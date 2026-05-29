@@ -40,7 +40,30 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Evaluate every gate below. For each, mark `PASS`, `FAIL`, or `N/A` with a one-line
+justification. A `FAIL` MUST be either resolved before proceeding or recorded in
+`Complexity Tracking` with an explicit rationale for the deviation.
+
+- **G1. Spec lineage (Principle I)** — Does this plan reference a `spec.md`
+  authored via `/speckit-specify` and clarified via `/speckit-clarify`?
+- **G2. AI schema-first (Principle II)** — For every Claude
+  `claude-sonnet-4-6` call this plan introduces or modifies, is a typed output
+  schema (tool use / structured output) declared, validated at runtime, and
+  covered by at least one golden fixture under `tests/ai-fixtures/`?
+- **G3. Mobile-first UX (Principle III)** — Have all new UI surfaces been
+  designed for ≤ 430px width first, with 44×44 minimum touch targets and no
+  desktop-only interactions on critical paths?
+- **G4. Local-first persistence (Principle IV)** — Are all new
+  coffee-profile / brew-log writes routed through the local store (IndexedDB or
+  equivalent) as source of truth? Are read paths network-independent?
+- **G5. Observability & cost (Principle V)** — Is every new Claude call
+  instrumented (input size, output tokens, latency, model id, failure reason)?
+  If this plan introduces ≥ 3 calls per user action, is the rationale captured
+  in `Complexity Tracking` below?
+- **G6. Technology constraints** — Does the plan stay within the constitution's
+  stack (React + TypeScript + Claude `claude-sonnet-4-6` + Web Speech API +
+  local store)? Any deviation requires a constitution amendment, not a plan
+  override.
 
 ## Project Structure
 
