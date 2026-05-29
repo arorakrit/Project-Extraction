@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+  --color-border-tertiary: rgba(26, 14, 10, 0.08);
+  --color-background-secondary: #f0ebe4;
+  --color-text-secondary: #6b5e54;
+  --font-sans: 'DM Sans', sans-serif;
+
+  --bg-primary: #faf6f1;
+  --text-primary: #1a0e0a;
+  --accent-saffron: #d4622a;
+  --accent-saffron-dark: #c4501a;
+  --accent-chai: #8a6840;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-weight: 400;
+}
+
+button {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-tertiary);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent-saffron);
+  color: var(--accent-saffron);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+nav button {
+  border: none;
+  border-radius: 0;
+  padding: 8px 4px;
+  font-size: 15px;
+  border-bottom: 2px solid transparent;
+}
+
+nav button:hover:not(:disabled) {
+  border-color: transparent;
+  border-bottom-color: var(--accent-saffron);
+  color: var(--accent-saffron);
+}
