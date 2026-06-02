@@ -1,0 +1,10 @@
+{
+  "roaster_name": "Heart Coffee Roasters",
+  "coffee_name": "Yirgacheffe Worka Sakaro",
+  "origin_country": "Ethiopia",
+  "origin_region": "Yirgacheffe",
+  "variety": "Heirloom",
+  "process": "Natural",
+  "roast_level": "Light",
+  "tasting_notes": ["blueberry", "strawberry", "rose", "honey"]
+}

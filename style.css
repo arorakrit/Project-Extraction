@@ -1,52 +1,92 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Space+Mono:wght@400;700&display=swap');
+/*
+ * Project Extraction — mobile-first base stylesheet.
+ * Constitution Principle III: design for ≤ 430 px first; 44×44 touch targets.
+ * No media queries narrower than 430 px in this file.
+ */
 
 :root {
-  --color-border-tertiary: rgba(26, 14, 10, 0.08);
-  --color-background-secondary: #f0ebe4;
-  --color-text-secondary: #6b5e54;
-  --font-sans: 'DM Sans', sans-serif;
+  /* Color tokens (light) */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f5f5f4;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #6b6b68;
+  --color-text-tertiary: #9a9a96;
+  --color-border-primary: #d4d4d0;
+  --color-border-tertiary: #ebebe7;
+  --color-accent: #a05b2b;
+  --color-error: #da291c;
 
-  --bg-primary: #faf6f1;
-  --text-primary: #1a0e0a;
-  --accent-saffron: #d4622a;
-  --accent-saffron-dark: #c4501a;
-  --accent-chai: #8a6840;
+  /* Sizing */
+  --touch-target-min: 44px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Type */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-size-sm: 13px;
+  --font-size-base: 15px;
+  --font-size-lg: 17px;
+  --font-size-xl: 22px;
+  --line-height-base: 1.45;
+
+  /* Radius */
+  --radius-md: 12px;
+  --radius-lg: 16px;
 }
 
-*, *::before, *::after {
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-primary: #1a1a1a;
+    --color-bg-secondary: #262625;
+    --color-text-primary: #f5f5f4;
+    --color-text-secondary: #a8a8a4;
+    --color-text-tertiary: #6b6b68;
+    --color-border-primary: #3a3a39;
+    --color-border-tertiary: #2c2c2b;
+    --color-accent: #c4814f;
+  }
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  padding: 0;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
   font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 1.7;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
-h1, h2, h3 {
-  font-family: 'Instrument Serif', Georgia, serif;
-  font-weight: 400;
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 button {
-  font-family: var(--font-sans);
-  font-size: 14px;
-  padding: 10px 24px;
-  border-radius: 8px;
-  border: 1px solid var(--color-border-tertiary);
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: 0.5px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-button:hover:not(:disabled) {
-  border-color: var(--accent-saffron);
-  color: var(--accent-saffron);
 }
 
 button:disabled {
@@ -54,21 +94,26 @@ button:disabled {
   cursor: not-allowed;
 }
 
-img {
-  display: block;
-  max-width: 100%;
+button.primary {
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
+  border-color: var(--color-text-primary);
 }
 
-nav button {
-  border: none;
-  border-radius: 0;
-  padding: 8px 4px;
-  font-size: 15px;
-  border-bottom: 2px solid transparent;
+input,
+textarea {
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  min-height: var(--touch-target-min);
+  padding: var(--space-3);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: 0.5px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  width: 100%;
 }
 
-nav button:hover:not(:disabled) {
-  border-color: transparent;
-  border-bottom-color: var(--accent-saffron);
-  color: var(--accent-saffron);
+a {
+  color: var(--color-accent);
+  text-decoration: none;
 }

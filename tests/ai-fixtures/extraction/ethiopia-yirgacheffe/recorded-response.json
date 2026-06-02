@@ -1,0 +1,28 @@
+{
+  "id": "msg_fixture_ethiopia_yirgacheffe_001",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-4-6",
+  "stop_reason": "tool_use",
+  "content": [
+    {
+      "type": "tool_use",
+      "id": "toolu_fixture_001",
+      "name": "record_coffee_label",
+      "input": {
+        "roaster_name": "Heart Coffee Roasters",
+        "coffee_name": "Yirgacheffe Worka Sakaro",
+        "origin_country": "Ethiopia",
+        "origin_region": "Yirgacheffe",
+        "variety": "Heirloom",
+        "process": "Natural",
+        "roast_level": "Light",
+        "tasting_notes": ["blueberry", "strawberry", "rose", "honey"]
+      }
+    }
+  ],
+  "usage": {
+    "input_tokens": 1450,
+    "output_tokens": 180
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "description": "Hand-crafted starter fixture for enrichment of the Ethiopian Yirgacheffe extraction fixture (see ../../extraction/ethiopia-yirgacheffe/). No image is sent for enrichment; this file is for parity with the extraction fixture format.",
+  "source": "hand-crafted",
+  "no_image": true,
+  "replace_with_real_recording": true
+}

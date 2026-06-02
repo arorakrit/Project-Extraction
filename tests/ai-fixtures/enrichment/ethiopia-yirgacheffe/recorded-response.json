@@ -1,0 +1,29 @@
+{
+  "id": "msg_fixture_enrichment_ethiopia_yirgacheffe_001",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-4-6",
+  "stop_reason": "tool_use",
+  "content": [
+    {
+      "type": "tool_use",
+      "id": "toolu_fixture_enrichment_001",
+      "name": "record_coffee_enrichment",
+      "input": {
+        "origin_story": "Yirgacheffe is one of the most celebrated coffee regions in Ethiopia, sitting at high altitude in the Gedeo Zone of the Southern Nations region. Coffees from this area are typically processed by smallholder farmers and washed at central washing stations, producing the floral, tea-like cups the region is famous for.",
+        "producer_context": "Worka Sakaro is a washing station serving smallholder farmers around the village of Worka. The station is known for careful cherry sorting and a long drying time on raised beds that intensifies the wild fruit notes of the natural process.",
+        "brew_recommendation": {
+          "method": "V60 pourover",
+          "ratio": "1:16",
+          "grind": "medium-fine",
+          "temperature_c": 93,
+          "notes": "Pre-wet with a gentle 50g pour, swirl, then continue in 50g pulses. Total brew time around 3:00."
+        }
+      }
+    }
+  ],
+  "usage": {
+    "input_tokens": 540,
+    "output_tokens": 350
+  }
+}
