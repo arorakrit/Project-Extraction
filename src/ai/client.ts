@@ -14,6 +14,15 @@ import {
   EXTRACTION_TOOL_DESCRIPTION,
   EXTRACTION_USER_PROMPT,
 } from '@/ai/prompts/extraction'
+import {
+  EnrichedCoffeeSchema,
+  type EnrichedCoffee,
+} from '@/ai/schemas/enrichment'
+import {
+  ENRICHMENT_TOOL_NAME,
+  ENRICHMENT_TOOL_DESCRIPTION,
+  buildEnrichmentPrompt,
+} from '@/ai/prompts/enrichment'
 
 const ANTHROPIC_ENDPOINT = 'https://api.anthropic.com/v1/messages'
 const ANTHROPIC_VERSION = '2023-06-01'
@@ -250,6 +259,36 @@ export async function extractCoffeeLabel(
 function stripDataUrlPrefix(dataUrl: string): string {
   const commaIdx = dataUrl.indexOf(',')
   return commaIdx === -1 ? dataUrl : dataUrl.slice(commaIdx + 1)
+}
+
+/**
+ * Layer additional context on top of an extracted coffee: origin story,
+ * producer context, and a brew recommendation. Per the enrichment contract,
+ * this is FIRE-AND-FORGET from the user's perspective — failures should be
+ * caught by the caller and surface as no enrichment sections, not as a
+ * blocking error.
+ *
+ * Throws:
+ *   - MissingApiKeyError if no BYOK key is configured
+ *   - ClaudeNetworkError on non-2xx HTTP response
+ *   - ClaudeSchemaError if the model's tool_use input fails Zod validation twice
+ */
+export async function enrichCoffeeProfile(
+  effective: ExtractedCoffee,
+): Promise<EnrichedCoffee> {
+  return callClaudeTool({
+    call: 'enrich_coffee_profile',
+    tool: ENRICHMENT_TOOL_NAME,
+    toolDescription: ENRICHMENT_TOOL_DESCRIPTION,
+    schema: EnrichedCoffeeSchema,
+    messages: [
+      {
+        role: 'user',
+        content: [{ type: 'text', text: buildEnrichmentPrompt(effective) }],
+      },
+    ],
+    inputImageBytes: null,
+  })
 }
 
 function mediaTypeFromDataUrl(

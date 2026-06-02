@@ -1,13 +1,8 @@
 import { getDB } from './db'
 import type { ExtractedCoffee } from '@/ai/schemas/extraction'
+import type { EnrichedCoffee } from '@/ai/schemas/enrichment'
 
 export type UserEditedFields = Partial<ExtractedCoffee>
-
-/**
- * Story-2 stub. Refined to `EnrichedCoffee` from `src/ai/schemas/enrichment.ts`
- * when Story 3 (T044) lands. Story 2 only writes `null` here.
- */
-export type EnrichedSnapshot = Record<string, unknown>
 
 export interface SavedCoffee {
   /** UUID v4; client-generated via crypto.randomUUID(). */
@@ -20,8 +15,8 @@ export interface SavedCoffee {
   extracted: ExtractedCoffee
   /** User's overrides applied on top of extracted. */
   user_edits: UserEditedFields
-  /** Populated by Story 3 enrichment. Null until then. */
-  enriched: EnrichedSnapshot | null
+  /** Populated by the post-save enrichment call. Null until then. */
+  enriched: EnrichedCoffee | null
   /** ISO 8601 of last enrichment attempt; null if never tried. */
   enrichment_attempted_at: string | null
   /** Schema version of this record. Currently 1. */
@@ -69,8 +64,48 @@ export async function listCoffees(): Promise<SavedCoffee[]> {
 
 export type CoffeeUpdate = {
   user_edits?: UserEditedFields
-  enriched?: EnrichedSnapshot | null
+  enriched?: EnrichedCoffee | null
   enrichment_attempted_at?: string | null
+}
+
+/**
+ * Merge the user's edits over the AI's extraction to produce the
+ * "effective" ExtractedCoffee — the view of the coffee that would be shown
+ * to the user, and the input that the enrichment call should see.
+ */
+export function effectiveExtractedCoffee(coffee: SavedCoffee): ExtractedCoffee {
+  return {
+    roaster_name:
+      'roaster_name' in coffee.user_edits
+        ? (coffee.user_edits.roaster_name ?? null)
+        : coffee.extracted.roaster_name,
+    coffee_name:
+      'coffee_name' in coffee.user_edits
+        ? (coffee.user_edits.coffee_name ?? null)
+        : coffee.extracted.coffee_name,
+    origin_country:
+      'origin_country' in coffee.user_edits
+        ? (coffee.user_edits.origin_country ?? null)
+        : coffee.extracted.origin_country,
+    origin_region:
+      'origin_region' in coffee.user_edits
+        ? (coffee.user_edits.origin_region ?? null)
+        : coffee.extracted.origin_region,
+    variety:
+      'variety' in coffee.user_edits
+        ? (coffee.user_edits.variety ?? null)
+        : coffee.extracted.variety,
+    process:
+      'process' in coffee.user_edits
+        ? (coffee.user_edits.process ?? null)
+        : coffee.extracted.process,
+    roast_level:
+      'roast_level' in coffee.user_edits
+        ? (coffee.user_edits.roast_level ?? null)
+        : coffee.extracted.roast_level,
+    tasting_notes:
+      coffee.user_edits.tasting_notes ?? coffee.extracted.tasting_notes,
+  }
 }
 
 /**

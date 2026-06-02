@@ -1,4 +1,8 @@
 import type { ExtractedCoffee } from '@/ai/schemas/extraction'
+import type {
+  BrewRecommendation,
+  EnrichedCoffee,
+} from '@/ai/schemas/enrichment'
 import type { SavedCoffee } from '@/store/coffees'
 
 type ScalarKey = keyof Omit<ExtractedCoffee, 'tasting_notes'>
@@ -122,7 +126,7 @@ export function CoffeeCard({ coffee, onDelete }: CoffeeCardProps) {
         )
       })}
 
-      {/* Enrichment sections — populated by Story 3 (T051) when coffee.enriched is non-null. */}
+      {coffee.enriched && <EnrichmentSections enriched={coffee.enriched} />}
 
       {onDelete && (
         <button
@@ -139,5 +143,102 @@ export function CoffeeCard({ coffee, onDelete }: CoffeeCardProps) {
         </button>
       )}
     </div>
+  )
+}
+
+function EnrichmentSections({ enriched }: { enriched: EnrichedCoffee }) {
+  const hasAny =
+    enriched.origin_story !== null ||
+    enriched.producer_context !== null ||
+    enriched.brew_recommendation !== null
+  if (!hasAny) return null
+
+  return (
+    <div style={{ marginTop: 'var(--space-6)' }}>
+      {enriched.origin_story && (
+        <Section heading="About this coffee" body={enriched.origin_story} />
+      )}
+      {enriched.producer_context && (
+        <Section heading="The producer" body={enriched.producer_context} />
+      )}
+      {enriched.brew_recommendation && (
+        <BrewGuide rec={enriched.brew_recommendation} />
+      )}
+    </div>
+  )
+}
+
+function Section({ heading, body }: { heading: string; body: string }) {
+  return (
+    <section style={{ marginBottom: 'var(--space-6)' }}>
+      <h2
+        style={{
+          fontSize: 'var(--font-size-base)',
+          fontWeight: 500,
+          margin: '0 0 var(--space-2)',
+        }}
+      >
+        {heading}
+      </h2>
+      <p
+        style={{
+          margin: 0,
+          fontSize: 'var(--font-size-base)',
+          lineHeight: 1.55,
+          color: 'var(--color-text-secondary)',
+        }}
+      >
+        {body}
+      </p>
+    </section>
+  )
+}
+
+function BrewGuide({ rec }: { rec: BrewRecommendation }) {
+  const tempStr = rec.temperature_c !== null ? `${rec.temperature_c}°C` : null
+  const summary = [rec.method, rec.ratio, rec.grind, tempStr]
+    .filter((p): p is string => Boolean(p))
+    .join(' · ')
+
+  return (
+    <section
+      style={{
+        marginBottom: 'var(--space-6)',
+        background: 'var(--color-bg-secondary)',
+        border: '0.5px solid var(--color-border-tertiary)',
+        borderRadius: 'var(--radius-lg)',
+        padding: 'var(--space-4)',
+      }}
+    >
+      <h2
+        style={{
+          fontSize: 'var(--font-size-base)',
+          fontWeight: 500,
+          margin: '0 0 var(--space-2)',
+        }}
+      >
+        Brew guide
+      </h2>
+      <p
+        style={{
+          margin: '0 0 var(--space-2)',
+          fontSize: 'var(--font-size-base)',
+        }}
+      >
+        {summary}
+      </p>
+      {rec.notes && (
+        <p
+          style={{
+            margin: 0,
+            fontSize: 'var(--font-size-sm)',
+            color: 'var(--color-text-secondary)',
+            lineHeight: 1.55,
+          }}
+        >
+          {rec.notes}
+        </p>
+      )}
+    </section>
   )
 }

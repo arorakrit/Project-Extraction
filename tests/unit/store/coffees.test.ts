@@ -72,14 +72,22 @@ describe('coffees store', () => {
 
     await updateCoffee('c2', {
       user_edits: { roaster_name: 'User-overridden roaster' },
-      enriched: { origin_story: 'A short story.' },
+      enriched: {
+        origin_story: 'A short story.',
+        producer_context: null,
+        brew_recommendation: null,
+      },
       enrichment_attempted_at: '2025-05-30T12:00:00.000Z',
     })
 
     const got = await getCoffee('c2')
     expect(got).not.toBeNull()
     expect(got!.user_edits.roaster_name).toBe('User-overridden roaster')
-    expect(got!.enriched).toEqual({ origin_story: 'A short story.' })
+    expect(got!.enriched).toEqual({
+      origin_story: 'A short story.',
+      producer_context: null,
+      brew_recommendation: null,
+    })
     expect(got!.enrichment_attempted_at).toBe('2025-05-30T12:00:00.000Z')
     // Invariant: extracted is unchanged.
     expect(got!.extracted).toEqual(initial.extracted)
@@ -93,11 +101,16 @@ describe('coffees store', () => {
     })
     await addCoffee(initial)
 
-    await updateCoffee('c3', { enriched: { foo: 'bar' } })
+    const enrichedValue = {
+      origin_story: 'context A',
+      producer_context: null,
+      brew_recommendation: null,
+    }
+    await updateCoffee('c3', { enriched: enrichedValue })
 
     const got = await getCoffee('c3')
     expect(got!.user_edits).toEqual({ coffee_name: 'pre-existing-edit' })
-    expect(got!.enriched).toEqual({ foo: 'bar' })
+    expect(got!.enriched).toEqual(enrichedValue)
     expect(got!.enrichment_attempted_at).toBe('2025-04-01T00:00:00.000Z')
     expect(got!.extracted).toEqual(initial.extracted)
   })

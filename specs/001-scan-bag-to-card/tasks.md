@@ -136,17 +136,17 @@ this phase is complete.
 
 ### Schemas, prompts, and AI client wiring for User Story 3
 
-- [ ] T044 [P] [US3] Define the enrichment Zod schema in `src/ai/schemas/enrichment.ts` — `EnrichedCoffeeSchema` and nested `BrewRecommendationSchema` per `data-model.md`; export `EnrichedCoffee` inferred type
-- [ ] T045 [P] [US3] Define the enrichment prompt and tool in `src/ai/prompts/enrichment.ts`: export `ENRICHMENT_SYSTEM_PROMPT` and `ENRICHMENT_TOOL_DEFINITION`; the tool's `input_schema` MUST be **derived at module load** from `EnrichedCoffeeSchema` via `zodToJsonSchema()` — no hand-written JSON Schema. The prompt MUST include an explicit "do not invent details" instruction so the model honors the no-fabrication rule (FR-016)
-- [ ] T046 [US3] Implement `enrichCoffeeProfile(effective: ExtractedCoffee)` in `src/ai/client.ts`: renders the prompt with effective fields, invokes `callClaudeTool` with `EnrichedCoffeeSchema`; no image; same retry-once policy as extraction; depends on T017, T044, T045
-- [ ] T047 [US3] Unit test the enrichment schema: `tests/unit/ai/enrichment-schema.test.ts` — covers happy path, all-fields-null path, `brew_recommendation: null` path, schema-failure path; depends on T044
-- [ ] T048 [US3] Record at least one golden fixture: `tests/ai-fixtures/enrichment/ethiopia-yirgacheffe/{recorded-response.json,expected-output.json}` using the same coffee as the extraction fixture so the chain is comparable; commit
-- [ ] T049 [US3] Fixture replay test: `tests/unit/ai/enrichment-fixtures.test.ts` — same pattern as T028 but for enrichment; depends on T044, T048
+- [X] T044 [P] [US3] Define the enrichment Zod schema in `src/ai/schemas/enrichment.ts` — `EnrichedCoffeeSchema` and nested `BrewRecommendationSchema` per `data-model.md`; export `EnrichedCoffee` inferred type
+- [X] T045 [P] [US3] Define the enrichment prompt and tool in `src/ai/prompts/enrichment.ts`: export `ENRICHMENT_SYSTEM_PROMPT` and `ENRICHMENT_TOOL_DEFINITION`; the tool's `input_schema` MUST be **derived at module load** from `EnrichedCoffeeSchema` via `zodToJsonSchema()` — no hand-written JSON Schema. The prompt MUST include an explicit "do not invent details" instruction so the model honors the no-fabrication rule (FR-016)
+- [X] T046 [US3] Implement `enrichCoffeeProfile(effective: ExtractedCoffee)` in `src/ai/client.ts`: renders the prompt with effective fields, invokes `callClaudeTool` with `EnrichedCoffeeSchema`; no image; same retry-once policy as extraction; depends on T017, T044, T045
+- [X] T047 [US3] Unit test the enrichment schema: `tests/unit/ai/enrichment-schema.test.ts` — covers happy path, all-fields-null path, `brew_recommendation: null` path, schema-failure path; depends on T044
+- [X] T048 [US3] Record at least one golden fixture: `tests/ai-fixtures/enrichment/ethiopia-yirgacheffe/{recorded-response.json,expected-output.json}` using the same coffee as the extraction fixture so the chain is comparable; commit
+- [X] T049 [US3] Fixture replay test: `tests/unit/ai/enrichment-fixtures.test.ts` — same pattern as T028 but for enrichment; depends on T044, T048
 
 ### UI for User Story 3
 
-- [ ] T050 [US3] Implement enrichment trigger in `src/views/CoffeeView.tsx`: in a `useEffect`, if the loaded coffee has `enriched === null` AND `enrichment_attempted_at === null` AND the API key is present, call `enrichCoffeeProfile()` with the effective ExtractedCoffee; on success call `updateCoffee(id, { enriched, enrichment_attempted_at: now })`; on any error call `updateCoffee(id, { enrichment_attempted_at: now })` only — silent to the user, per the enrichment contract; depends on T046, T036, T041
-- [ ] T051 [US3] Extend `src/components/CoffeeCard.tsx` to render enrichment sections when `coffee.enriched` is non-null: origin story paragraph, producer context paragraph, brew recommendation card (method · ratio · grind · temp); each section omitted independently when its field is null (FR-016); ensure user edits in `user_edits` are NEVER overwritten by enrichment values during render (the effective-field merge ordering is `userEdits ⊕ extracted` — enrichment never touches this merge, only adds new sections); depends on T038
+- [X] T050 [US3] Implement enrichment trigger in `src/views/CoffeeView.tsx`: in a `useEffect`, if the loaded coffee has `enriched === null` AND `enrichment_attempted_at === null` AND the API key is present, call `enrichCoffeeProfile()` with the effective ExtractedCoffee; on success call `updateCoffee(id, { enriched, enrichment_attempted_at: now })`; on any error call `updateCoffee(id, { enrichment_attempted_at: now })` only — silent to the user, per the enrichment contract; depends on T046, T036, T041
+- [X] T051 [US3] Extend `src/components/CoffeeCard.tsx` to render enrichment sections when `coffee.enriched` is non-null: origin story paragraph, producer context paragraph, brew recommendation card (method · ratio · grind · temp); each section omitted independently when its field is null (FR-016); ensure user edits in `user_edits` are NEVER overwritten by enrichment values during render (the effective-field merge ordering is `userEdits ⊕ extracted` — enrichment never touches this merge, only adds new sections); depends on T038
 
 **Checkpoint**: All three user stories now work end-to-end. The full feature matches the spec's success criteria SC-001 through SC-007.
 
@@ -156,12 +156,12 @@ this phase is complete.
 
 **Purpose**: Migrate away from the starter scaffolding, finalise documentation, and run the quickstart verification end-to-end.
 
-- [ ] T052 [P] Delete the starter scaffolding files now replaced by `src/`: root `App.jsx`, root `main.jsx`, `components/CoffeeCard.jsx`, `components/Scanner.jsx`, `components/VoiceLogger.jsx`, `lib/claude.js` (after confirming no source file references them — VoiceLogger is brew-log territory, future spec)
-- [ ] T053 [P] Update `package.json` `name` from `grind-coffee-scanner` to `project-extraction` and bump `version` to `0.1.0`; ensure all scripts (`dev`, `build`, `preview`, `test`, `test:watch`, `typecheck`, `lint`) are present and correct
+- [X] T052 [P] Delete the starter scaffolding files now replaced by `src/`: root `App.jsx`, root `main.jsx`, `components/CoffeeCard.jsx`, `components/Scanner.jsx`, `components/VoiceLogger.jsx`, `lib/claude.js` (after confirming no source file references them — VoiceLogger is brew-log territory, future spec)
+- [X] T053 [P] Update `package.json` `name` from `grind-coffee-scanner` to `project-extraction` and bump `version` to `0.1.0`; ensure all scripts (`dev`, `build`, `preview`, `test`, `test:watch`, `typecheck`, `lint`) are present and correct
 - [ ] T054 [P] Run the constitution's mandatory mobile-first verification per Principle III: open the app at 393 px (iPhone 14 Pro) and 430 px (iPhone Pro Max) viewports; verify capture, save, library navigation, and coffee detail are all reachable in one thumb-zone tap with ≥ 44×44 touch targets; capture screenshots; attach to the eventual PR description
 - [ ] T055 [P] Execute the quickstart.md verification end-to-end: Story 1 (capture → card), Story 2 (save → revisit offline), Story 3 (enrichment shows for well-known origin, hides for obscure). Run extraction across **at least 5 real specialty bags** (covering different roaster styles, processes, and origins) and tally the SC-002 field-accuracy rate plus the SC-004a/SC-004b edit-count distribution (per coffee: how many fields the tester corrected before tap-Save); record the SC-001 timing (photo → card ≤ 10 s) and the SC-006 timing (open → photo → save ≤ 60 s) on the same set; note results in the PR description
-- [ ] T056 Final typecheck + lint + test pass: `npm run typecheck && npm run lint && npm run test` exit zero
-- [ ] T057 Confirm constitution gates G1–G6 still hold against the implemented code (re-read `plan.md`'s Constitution Check); if any gate now fails, file a tasks-template-style task for the fix BEFORE merging
+- [X] T056 Final typecheck + lint + test pass: `npm run typecheck && npm run lint && npm run test` exit zero
+- [X] T057 Confirm constitution gates G1–G6 still hold against the implemented code (re-read `plan.md`'s Constitution Check); if any gate now fails, file a tasks-template-style task for the fix BEFORE merging
 
 ---
 
