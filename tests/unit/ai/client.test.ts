@@ -45,6 +45,7 @@ async function invoke(): Promise<unknown> {
     schema: TestSchema,
     messages: [{ role: 'user', content: [{ type: 'text', text: 'hi' }] }],
     inputImageBytes: 100,
+    inputTextChars: null,
   })
 }
 

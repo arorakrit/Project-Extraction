@@ -1,7 +1,8 @@
 import { type DBSchema, type IDBPDatabase, openDB } from 'idb'
+import type { BrewLogEntry } from './brews'
 
 const DB_NAME = 'project-extraction'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 export interface ProjectExtractionDB extends DBSchema {
   coffees: {
@@ -11,6 +12,11 @@ export interface ProjectExtractionDB extends DBSchema {
   settings: {
     key: string
     value: { key: string; value: unknown }
+  }
+  brews: {
+    key: string
+    value: BrewLogEntry
+    indexes: { by_coffee: string } // on coffee_id
   }
 }
 
@@ -24,6 +30,10 @@ export function getDB(): Promise<IDBPDatabase<ProjectExtractionDB>> {
         if (oldVersion < 1) {
           db.createObjectStore('coffees', { keyPath: 'id' })
           db.createObjectStore('settings', { keyPath: 'key' })
+        }
+        if (oldVersion < 2) {
+          const brews = db.createObjectStore('brews', { keyPath: 'id' })
+          brews.createIndex('by_coffee', 'coffee_id')
         }
       },
     })

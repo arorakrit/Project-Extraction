@@ -23,13 +23,26 @@ import {
   ENRICHMENT_TOOL_DESCRIPTION,
   buildEnrichmentPrompt,
 } from '@/ai/prompts/enrichment'
+import {
+  StructuredBrewSchema,
+  isEmptyBrew,
+  type StructuredBrew,
+} from '@/ai/schemas/brew'
+import {
+  BREW_TOOL_NAME,
+  BREW_TOOL_DESCRIPTION,
+  buildBrewPrompt,
+} from '@/ai/prompts/brew'
 
 const ANTHROPIC_ENDPOINT = 'https://api.anthropic.com/v1/messages'
 const ANTHROPIC_VERSION = '2023-06-01'
 const MODEL_ID = 'claude-sonnet-4-6' as const
 const RETRY_DELAY_MS = 500
 
-export type ClaudeToolName = 'record_coffee_label' | 'record_coffee_enrichment'
+export type ClaudeToolName =
+  | 'record_coffee_label'
+  | 'record_coffee_enrichment'
+  | 'record_brew_log'
 
 export class MissingApiKeyError extends Error {
   constructor() {
@@ -80,6 +93,13 @@ export class ExtractionEmptyError extends Error {
   }
 }
 
+export class BrewEmptyError extends Error {
+  constructor() {
+    super("Didn't catch that — try again, or enter it by hand.")
+    this.name = 'BrewEmptyError'
+  }
+}
+
 interface AnthropicResponse {
   content: AnthropicContentBlock[]
   usage?: {
@@ -95,6 +115,7 @@ export interface CallClaudeToolArgs<S extends ZodTypeAny> {
   schema: S
   messages: Array<{ role: 'user'; content: AnthropicContentBlock[] }>
   inputImageBytes: number | null
+  inputTextChars: number | null
 }
 
 /**
@@ -189,6 +210,7 @@ export async function callClaudeTool<S extends ZodTypeAny>(
       status: retried ? 'retry_then_ok' : 'ok',
       latency_ms: Date.now() - startedAt,
       input_image_bytes: args.inputImageBytes,
+      input_text_chars: args.inputTextChars,
       output_tokens: result.tokens,
       retried,
       ts: new Date(startedAt).toISOString(),
@@ -205,6 +227,7 @@ export async function callClaudeTool<S extends ZodTypeAny>(
       status,
       latency_ms: Date.now() - startedAt,
       input_image_bytes: args.inputImageBytes,
+      input_text_chars: args.inputTextChars,
       output_tokens: null,
       retried,
       ts: new Date(startedAt).toISOString(),
@@ -250,6 +273,7 @@ export async function extractCoffeeLabel(
       },
     ],
     inputImageBytes: base64.length,
+    inputTextChars: null,
   })
 
   if (isEmptyExtraction(result)) throw new ExtractionEmptyError()
@@ -288,7 +312,41 @@ export async function enrichCoffeeProfile(
       },
     ],
     inputImageBytes: null,
+    inputTextChars: null,
   })
+}
+
+/**
+ * Structure a raw spoken brew transcript into typed brew parameters. Exactly
+ * one Claude call per brew log (constitution Principle V). Text-only: no image.
+ *
+ * Throws:
+ *   - MissingApiKeyError if no BYOK key is configured
+ *   - ClaudeNetworkError on non-2xx HTTP response (caller falls back to the
+ *     manual form pre-filled with the transcript — no data loss)
+ *   - ClaudeSchemaError if the tool_use input fails Zod validation twice
+ *   - BrewEmptyError if schema-valid but every field is null (FR-008)
+ */
+export async function structureBrewNote(
+  transcript: string,
+): Promise<StructuredBrew> {
+  const result = await callClaudeTool({
+    call: 'structure_brew_note',
+    tool: BREW_TOOL_NAME,
+    toolDescription: BREW_TOOL_DESCRIPTION,
+    schema: StructuredBrewSchema,
+    messages: [
+      {
+        role: 'user',
+        content: [{ type: 'text', text: buildBrewPrompt(transcript) }],
+      },
+    ],
+    inputImageBytes: null,
+    inputTextChars: transcript.length,
+  })
+
+  if (isEmptyBrew(result)) throw new BrewEmptyError()
+  return result
 }
 
 function mediaTypeFromDataUrl(
