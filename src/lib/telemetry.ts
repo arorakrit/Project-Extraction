@@ -1,9 +1,11 @@
 export interface TelemetryRecord {
-  call: 'extract_coffee_label' | 'enrich_coffee_profile'
+  call: 'extract_coffee_label' | 'enrich_coffee_profile' | 'structure_brew_note'
   model_id: 'claude-sonnet-4-6'
   status: 'ok' | 'retry_then_ok' | 'schema_error' | 'network_error'
   latency_ms: number
   input_image_bytes: number | null
+  /** Transcript length for text-input calls; null for image calls. */
+  input_text_chars: number | null
   output_tokens: number | null
   retried: boolean
   ts: string

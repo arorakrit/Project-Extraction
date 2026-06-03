@@ -36,8 +36,8 @@ from 001; all new source under `src/`; all tests under `tests/`; both at repo ro
 
 **Purpose**: Dependencies and directories for brew logging. Nothing story-specific yet.
 
-- [ ] T001 [P] Add `@types/dom-speech-recognition@^0.0.4` as a devDependency in `package.json` (ambient Web Speech API typings; no runtime dependency added)
-- [ ] T002 [P] Create the new directories for this feature: `tests/unit/lib/` and `tests/ai-fixtures/brew-structuring/v60-ethiopia/` (use `.gitkeep` placeholders where empty)
+- [X] T001 [P] Add `@types/dom-speech-recognition@^0.0.4` as a devDependency in `package.json` (ambient Web Speech API typings; no runtime dependency added)
+- [X] T002 [P] Create the new directories for this feature: `tests/unit/lib/` and `tests/ai-fixtures/brew-structuring/v60-ethiopia/` (use `.gitkeep` placeholders where empty)
 
 **Checkpoint**: `npm install` resolves the new types package; `npm run typecheck` still exits zero.
 
@@ -51,16 +51,16 @@ editable fields component). No user story work can begin until this phase is don
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T003 Bump IndexedDB to version 2 in `src/store/db.ts`: set `DB_VERSION = 2`; add a `brews` entry to the `ProjectExtractionDB` `DBSchema` interface (`key: string`, `value: BrewLogEntry`, `indexes: { by_coffee: string }`); in `upgrade()` add an `if (oldVersion < 2)` branch that creates the `brews` object store (keyPath `id`) and its `by_coffee` index on `coffee_id`; leave the `oldVersion < 1` branch (coffees, settings) untouched — forward-only per Principle IV
-- [ ] T004 [P] Create `src/ai/schemas/brew.ts`: `StructuredBrewSchema` (Zod) with nullable fields `brew_method`, `dose_g`, `water_g`, `ratio`, `grind`, `water_temp_c`, `total_time_s` (int), `tasting_note` per data-model.md; export `StructuredBrew` type and `isEmptyBrew(b)` (true iff every field is null → FR-008)
-- [ ] T005 [P] Unit test `tests/unit/ai/brew-schema.test.ts`: assert `StructuredBrewSchema` accepts a fully-populated brew, accepts an all-null brew, rejects a wrong-typed field (e.g. string `dose_g`), and that `isEmptyBrew` is true only for the all-null case; depends on T004
-- [ ] T006 [P] Create `src/lib/ratio.ts`: `deriveRatio(dose_g: number | null, water_g: number | null): number | null` — null if either side missing or `dose_g <= 0`; else `water_g / dose_g` rounded to 1 decimal (data-model.md)
-- [ ] T007 [P] Unit test `tests/unit/lib/ratio.test.ts`: 18 g / 300 g → 16.7; 15 g / 240 g → 16; null on missing dose, missing water, and zero/negative dose; depends on T006
-- [ ] T008 Extend `src/lib/telemetry.ts`: add `'structure_brew_note'` to the `TelemetryRecord['call']` union and add an `input_text_chars: number | null` field to the `TelemetryRecord` interface (image-less calls set `input_image_bytes: null`); update `aggregateTokens()` only if it needs the new field (it does not — leave token math unchanged)
-- [ ] T009 Create the brew store module `src/store/brews.ts`: define `BrewLogEntry` interface + `BrewUserEdits = Partial<StructuredBrew>` (data-model.md); implement `addBrew` (refuses `schema_version !== 1`), `getBrew` (throws `StaleBrewSchemaError` on bad version), `listBrewsForCoffee` (reads via the `by_coffee` index, sorts `logged_at` descending), `updateBrew` (exposes only `user_edits`; `structured` invariant), `deleteBrew`, `deleteBrewsForCoffee`, and the pure `effectiveBrew(entry)` merge helper (presence-checked like `effectiveExtractedCoffee`); depends on T003, T004
-- [ ] T010 Unit test `tests/unit/store/brews.test.ts` (via `fake-indexeddb`): round-trip `addBrew`/`getBrew`; `listBrewsForCoffee` returns only the matching coffee's brews newest-first; `updateBrew` changes `user_edits` but never `structured`; `deleteBrewsForCoffee` removes all of one coffee's brews and none of another's; `effectiveBrew` honors an explicit null edit; depends on T009
-- [ ] T011 Extend `deleteCoffee` in `src/store/coffees.ts` to cascade-delete the coffee's brews (FR-021): call `deleteBrewsForCoffee(id)` alongside the coffee delete so a brew never outlives its coffee; depends on T009
-- [ ] T012 [P] Create the shared editable fields component `src/components/BrewFields.tsx`: controlled inputs for all eight brew parameters with 44×44 touch targets, each field tappable/empty-markable ("—"), showing the derived ratio (via `deriveRatio`) read-only when dose+water present and an editable ratio input otherwise; pure presentational (value + onChange props), reused by review, manual entry, and edit; depends on T006
+- [X] T003 Bump IndexedDB to version 2 in `src/store/db.ts`: set `DB_VERSION = 2`; add a `brews` entry to the `ProjectExtractionDB` `DBSchema` interface (`key: string`, `value: BrewLogEntry`, `indexes: { by_coffee: string }`); in `upgrade()` add an `if (oldVersion < 2)` branch that creates the `brews` object store (keyPath `id`) and its `by_coffee` index on `coffee_id`; leave the `oldVersion < 1` branch (coffees, settings) untouched — forward-only per Principle IV
+- [X] T004 [P] Create `src/ai/schemas/brew.ts`: `StructuredBrewSchema` (Zod) with nullable fields `brew_method`, `dose_g`, `water_g`, `ratio`, `grind`, `water_temp_c`, `total_time_s` (int), `tasting_note` per data-model.md; export `StructuredBrew` type and `isEmptyBrew(b)` (true iff every field is null → FR-008)
+- [X] T005 [P] Unit test `tests/unit/ai/brew-schema.test.ts`: assert `StructuredBrewSchema` accepts a fully-populated brew, accepts an all-null brew, rejects a wrong-typed field (e.g. string `dose_g`), and that `isEmptyBrew` is true only for the all-null case; depends on T004
+- [X] T006 [P] Create `src/lib/ratio.ts`: `deriveRatio(dose_g: number | null, water_g: number | null): number | null` — null if either side missing or `dose_g <= 0`; else `water_g / dose_g` rounded to 1 decimal (data-model.md)
+- [X] T007 [P] Unit test `tests/unit/lib/ratio.test.ts`: 18 g / 300 g → 16.7; 15 g / 240 g → 16; null on missing dose, missing water, and zero/negative dose; depends on T006
+- [X] T008 Extend `src/lib/telemetry.ts`: add `'structure_brew_note'` to the `TelemetryRecord['call']` union and add an `input_text_chars: number | null` field to the `TelemetryRecord` interface (image-less calls set `input_image_bytes: null`); update `aggregateTokens()` only if it needs the new field (it does not — leave token math unchanged)
+- [X] T009 Create the brew store module `src/store/brews.ts`: define `BrewLogEntry` interface + `BrewUserEdits = Partial<StructuredBrew>` (data-model.md); implement `addBrew` (refuses `schema_version !== 1`), `getBrew` (throws `StaleBrewSchemaError` on bad version), `listBrewsForCoffee` (reads via the `by_coffee` index, sorts `logged_at` descending), `updateBrew` (exposes only `user_edits`; `structured` invariant), `deleteBrew`, `deleteBrewsForCoffee`, and the pure `effectiveBrew(entry)` merge helper (presence-checked like `effectiveExtractedCoffee`); depends on T003, T004
+- [X] T010 Unit test `tests/unit/store/brews.test.ts` (via `fake-indexeddb`): round-trip `addBrew`/`getBrew`; `listBrewsForCoffee` returns only the matching coffee's brews newest-first; `updateBrew` changes `user_edits` but never `structured`; `deleteBrewsForCoffee` removes all of one coffee's brews and none of another's; `effectiveBrew` honors an explicit null edit; depends on T009
+- [X] T011 Extend `deleteCoffee` in `src/store/coffees.ts` to cascade-delete the coffee's brews (FR-021): call `deleteBrewsForCoffee(id)` alongside the coffee delete so a brew never outlives its coffee; depends on T009
+- [X] T012 [P] Create the shared editable fields component `src/components/BrewFields.tsx`: controlled inputs for all eight brew parameters with 44×44 touch targets, each field tappable/empty-markable ("—"), showing the derived ratio (via `deriveRatio`) read-only when dose+water present and an editable ratio input otherwise; pure presentational (value + onChange props), reused by review, manual entry, and edit; depends on T006
 
 **Checkpoint**: `npm run typecheck`, `npm run lint`, and `npm run test` exit zero; the IndexedDB upgrade to v2 creates the `brews` store with the `by_coffee` index; foundational tests pass.
 
@@ -80,17 +80,17 @@ editable, and Save persists the entry against that coffee (verifiable via
 
 ### Tests for User Story 1 (constitutional minimum) ⚠️
 
-- [ ] T013 [P] [US1] Add the golden fixture under `tests/ai-fixtures/brew-structuring/v60-ethiopia/`: `input.transcript.json` (raw spoken text, no audio), `recorded-response.json` (a captured Claude `tool_use` response for the brew), and `expected-output.json` (the post-validation `StructuredBrew`)
-- [ ] T014 [P] [US1] Extend `tests/unit/ai/brew-schema.test.ts` with a fixture-replay case: load `recorded-response.json`, run its tool_use input through `StructuredBrewSchema.parse(...)`, and assert deep equality with `expected-output.json` (no live Claude call); depends on T013
+- [X] T013 [P] [US1] Add the golden fixture under `tests/ai-fixtures/brew-structuring/v60-ethiopia/`: `input.transcript.json` (raw spoken text, no audio), `recorded-response.json` (a captured Claude `tool_use` response for the brew), and `expected-output.json` (the post-validation `StructuredBrew`)
+- [X] T014 [P] [US1] Extend `tests/unit/ai/brew-schema.test.ts` with a fixture-replay case: load `recorded-response.json`, run its tool_use input through `StructuredBrewSchema.parse(...)`, and assert deep equality with `expected-output.json` (no live Claude call); depends on T013
 
 ### Implementation for User Story 1
 
-- [ ] T015 [P] [US1] Create `src/lib/speech.ts`: `isSpeechRecognitionAvailable()` (checks `window.SpeechRecognition ?? window.webkitSpeechRecognition`) and `transcribeOnce(): Promise<string>` wrapping a single recognition session (`onresult`/`onerror`/`onend`) behind a Promise; isolates the vendor-prefixed global so it is stubbable in tests
-- [ ] T016 [P] [US1] Create `src/ai/prompts/brew.ts`: export `BREW_TOOL_NAME = 'record_brew_log'`, `BREW_TOOL_DESCRIPTION` (instructs null for unstated params; grams for dose/water, °C for temp, whole seconds for time), and `buildBrewPrompt(transcript)` per the contract
-- [ ] T017 [US1] Add `structureBrewNote(transcript: string): Promise<StructuredBrew>` to `src/ai/client.ts`: call the existing `callClaudeTool` with the `record_brew_log` tool and `StructuredBrewSchema`; pass `inputImageBytes: null` and the new `input_text_chars: transcript.length` to telemetry; throw a new `BrewEmptyError` when `isEmptyBrew(result)` (FR-008); depends on T008, T016
-- [ ] T018 [US1] Create `src/components/BrewReview.tsx`: render `BrewFields` over the structured brew for review/edit, capturing `user_edits`; a Save button builds a `BrewLogEntry` (`source: 'voice'`, `transcript`, fresh `crypto.randomUUID()`, `logged_at` now, `schema_version: 1`) and calls `addBrew`; depends on T009, T012
-- [ ] T019 [US1] Create `src/components/BrewRecorder.tsx`: one-tap record button (≥ 44×44, thumb-zone) driving `transcribeOnce()` → `structureBrewNote()`; shows distinct listening and structuring in-progress states; on success renders `BrewReview`; on `BrewEmptyError` shows "Didn't catch that — try again, or enter by hand" (FR-008); depends on T015, T017, T018
-- [ ] T020 [US1] Wire the entry point into `src/views/CoffeeView.tsx`: add a "Log a brew" affordance below the existing `CoffeeCard` that opens `BrewRecorder` for the current coffee; on save, dismiss the recorder; depends on T019
+- [X] T015 [P] [US1] Create `src/lib/speech.ts`: `isSpeechRecognitionAvailable()` (checks `window.SpeechRecognition ?? window.webkitSpeechRecognition`) and `transcribeOnce(): Promise<string>` wrapping a single recognition session (`onresult`/`onerror`/`onend`) behind a Promise; isolates the vendor-prefixed global so it is stubbable in tests
+- [X] T016 [P] [US1] Create `src/ai/prompts/brew.ts`: export `BREW_TOOL_NAME = 'record_brew_log'`, `BREW_TOOL_DESCRIPTION` (instructs null for unstated params; grams for dose/water, °C for temp, whole seconds for time), and `buildBrewPrompt(transcript)` per the contract
+- [X] T017 [US1] Add `structureBrewNote(transcript: string): Promise<StructuredBrew>` to `src/ai/client.ts`: call the existing `callClaudeTool` with the `record_brew_log` tool and `StructuredBrewSchema`; pass `inputImageBytes: null` and the new `input_text_chars: transcript.length` to telemetry; throw a new `BrewEmptyError` when `isEmptyBrew(result)` (FR-008); depends on T008, T016
+- [X] T018 [US1] Create `src/components/BrewReview.tsx`: render `BrewFields` over the structured brew for review/edit, capturing `user_edits`; a Save button builds a `BrewLogEntry` (`source: 'voice'`, `transcript`, fresh `crypto.randomUUID()`, `logged_at` now, `schema_version: 1`) and calls `addBrew`; depends on T009, T012
+- [X] T019 [US1] Create `src/components/BrewRecorder.tsx`: one-tap record button (≥ 44×44, thumb-zone) driving `transcribeOnce()` → `structureBrewNote()`; shows distinct listening and structuring in-progress states; on success renders `BrewReview`; on `BrewEmptyError` shows "Didn't catch that — try again, or enter by hand" (FR-008); depends on T015, T017, T018
+- [X] T020 [US1] Wire the entry point into `src/views/CoffeeView.tsx`: add a "Log a brew" affordance below the existing `CoffeeCard` that opens `BrewRecorder` for the current coffee; on save, dismiss the recorder; depends on T019
 
 **Checkpoint**: User Story 1 is fully functional and testable independently — speak a note, review/edit, save, and the entry is persisted against the coffee.
 
@@ -109,10 +109,10 @@ and a brew-less coffee shows the empty state — all offline.
 
 ### Implementation for User Story 2
 
-- [ ] T021 [P] [US2] Create `src/components/BrewTimeline.tsx`: given a `coffeeId`, load via `listBrewsForCoffee`, render rows newest-first each showing method, derived/effective ratio, grind, and tasting note (≥ 44×44 tap targets); render a clear empty state with a one-tap "log your first brew" action when there are none (FR-016); depends on T009
-- [ ] T022 [US2] Mount `BrewTimeline` in `src/views/CoffeeView.tsx` below the card/record entry point; refresh the list after a brew is saved in US1 so a new entry appears at the top; depends on T020, T021
-- [ ] T023 [US2] Add brew editing: tapping a timeline row opens `BrewFields` over that entry's `effectiveBrew`, and saving calls `updateBrew(id, { user_edits })` and updates the row in place (FR-014); depends on T021, T012
-- [ ] T024 [US2] Add brew deletion: a delete control on the entry calls `deleteBrew(id)` and removes it from the timeline without reappearing on reload (FR-015); depends on T021
+- [X] T021 [P] [US2] Create `src/components/BrewTimeline.tsx`: given a `coffeeId`, load via `listBrewsForCoffee`, render rows newest-first each showing method, derived/effective ratio, grind, and tasting note (≥ 44×44 tap targets); render a clear empty state with a one-tap "log your first brew" action when there are none (FR-016); depends on T009
+- [X] T022 [US2] Mount `BrewTimeline` in `src/views/CoffeeView.tsx` below the card/record entry point; refresh the list after a brew is saved in US1 so a new entry appears at the top; depends on T020, T021
+- [X] T023 [US2] Add brew editing: tapping a timeline row opens `BrewFields` over that entry's `effectiveBrew`, and saving calls `updateBrew(id, { user_edits })` and updates the row in place (FR-014); depends on T021, T012
+- [X] T024 [US2] Add brew deletion: a delete control on the entry calls `deleteBrew(id)` and removes it from the timeline without reappearing on reload (FR-015); depends on T021
 
 **Checkpoint**: User Stories 1 and 2 both work independently — capture brews and review/edit/delete the full offline history.
 
@@ -132,10 +132,10 @@ the transcript (no loss).
 
 ### Implementation for User Story 3
 
-- [ ] T025 [P] [US3] Create `src/components/BrewEntryForm.tsx`: wraps `BrewFields` for a brand-new manual entry, building a `BrewLogEntry` (`source: 'manual'`, `transcript: null`, ratio derived identically) and calling `addBrew` (FR-019); accepts an optional initial `tasting_note` for the pre-fill case; depends on T009, T012
-- [ ] T026 [US3] Auto-route to manual when speech is unavailable: in the `BrewRecorder`/entry point, when `isSpeechRecognitionAvailable()` is false, present `BrewEntryForm` directly instead of the record button (FR-017); depends on T019, T025
-- [ ] T027 [US3] Add an explicit "enter by hand" option alongside the record button when speech IS available, opening `BrewEntryForm` (FR-018); depends on T019, T025
-- [ ] T028 [US3] No-loss failure fallback: in `BrewRecorder`, catch `ClaudeNetworkError`/`ClaudeSchemaError` from `structureBrewNote` and open `BrewEntryForm` pre-filled with the raw transcript as the tasting note (Principle IV — no data loss; contract failure-mode UX); depends on T019, T025
+- [X] T025 [P] [US3] Create `src/components/BrewEntryForm.tsx`: wraps `BrewFields` for a brand-new manual entry, building a `BrewLogEntry` (`source: 'manual'`, `transcript: null`, ratio derived identically) and calling `addBrew` (FR-019); accepts an optional initial `tasting_note` for the pre-fill case; depends on T009, T012
+- [X] T026 [US3] Auto-route to manual when speech is unavailable: in the `BrewRecorder`/entry point, when `isSpeechRecognitionAvailable()` is false, present `BrewEntryForm` directly instead of the record button (FR-017); depends on T019, T025
+- [X] T027 [US3] Add an explicit "enter by hand" option alongside the record button when speech IS available, opening `BrewEntryForm` (FR-018); depends on T019, T025
+- [X] T028 [US3] No-loss failure fallback: in `BrewRecorder`, catch `ClaudeNetworkError`/`ClaudeSchemaError` from `structureBrewNote` and open `BrewEntryForm` pre-filled with the raw transcript as the tasting note (Principle IV — no data loss; contract failure-mode UX); depends on T019, T025
 
 **Checkpoint**: All three user stories are independently functional; every path to logging a brew reaches a usable form and no spoken note is discarded on failure.
 
@@ -147,8 +147,8 @@ the transcript (no loss).
 
 - [ ] T029 [P] Run the constitution's mandatory mobile-first verification per Principle III: open a coffee at 393 px (iPhone 14 Pro) and 430 px (iPhone Pro Max); verify the record button, every editable field, Save, each timeline row, edit, and delete are reachable in one thumb-zone tap with ≥ 44×44 targets and no hover/right-click paths; capture screenshots; attach to the eventual PR description
 - [ ] T030 [P] Execute the quickstart.md verification end-to-end: Story 1 (speak → structured entry), Story 2 (timeline → edit/delete offline), Story 3 (unavailable-speech, enter-by-hand, and offline no-loss pre-fill). Run structuring across **at least 5 naturally spoken brew notes** (different methods/phrasings) and tally the SC-002 field-placement accuracy, the SC-004 edit-count distribution, the SC-001 timing (stop-speaking → entry ≤ 10 s), and SC-008 (ratio matches stated dose/water); note results in the PR description
-- [ ] T031 Final typecheck + lint + test pass: `npm run typecheck && npm run lint && npm run test` exit zero
-- [ ] T032 Confirm constitution gates G1–G6 still hold against the implemented code (re-read `plan.md`'s Constitution Check); verify exactly **1 Claude call per brew log**, all brew reads work offline, and no raw transcript/audio appears in telemetry; if any gate now fails, file a tasks-template-style task for the fix BEFORE merging
+- [X] T031 Final typecheck + lint + test pass: `npm run typecheck && npm run lint && npm run test` exit zero
+- [X] T032 Confirm constitution gates G1–G6 still hold against the implemented code (re-read `plan.md`'s Constitution Check); verify exactly **1 Claude call per brew log**, all brew reads work offline, and no raw transcript/audio appears in telemetry; if any gate now fails, file a tasks-template-style task for the fix BEFORE merging
 
 ---
 

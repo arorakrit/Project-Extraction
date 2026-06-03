@@ -1,4 +1,5 @@
 import { getDB } from './db'
+import { deleteBrewsForCoffee } from './brews'
 import type { ExtractedCoffee } from '@/ai/schemas/extraction'
 import type { EnrichedCoffee } from '@/ai/schemas/enrichment'
 
@@ -137,5 +138,7 @@ export async function updateCoffee(
 
 export async function deleteCoffee(id: string): Promise<void> {
   const db = await getDB()
+  // Cascade: a brew must not outlive its coffee (FR-021).
+  await deleteBrewsForCoffee(id)
   await db.delete(STORE, id)
 }

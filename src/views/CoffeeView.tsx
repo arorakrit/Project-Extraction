@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { CoffeeCard } from '@/components/CoffeeCard'
+import { BrewRecorder } from '@/components/BrewRecorder'
+import { BrewTimeline } from '@/components/BrewTimeline'
 import {
   deleteCoffee,
   effectiveExtractedCoffee,
@@ -19,6 +21,8 @@ function parseCoffeeId(route: string): string | null {
 export function CoffeeView() {
   const [coffee, setCoffee] = useState<SavedCoffee | null>(null)
   const [loaded, setLoaded] = useState(false)
+  const [recording, setRecording] = useState(false)
+  const [refreshToken, setRefreshToken] = useState(0)
   const enrichingRef = useRef(false)
 
   useEffect(() => {
@@ -118,5 +122,37 @@ export function CoffeeView() {
     )
   }
 
-  return <CoffeeCard coffee={coffee} onDelete={handleDelete} />
+  return (
+    <>
+      <CoffeeCard coffee={coffee} onDelete={handleDelete} />
+
+      <div style={{ padding: '0 var(--space-4)', maxWidth: 430, margin: '0 auto' }}>
+        {recording ? (
+          <BrewRecorder
+            coffeeId={coffee.id}
+            onSaved={() => {
+              setRecording(false)
+              setRefreshToken(t => t + 1)
+            }}
+            onClose={() => setRecording(false)}
+          />
+        ) : (
+          <button
+            type="button"
+            className="primary"
+            onClick={() => setRecording(true)}
+            style={{ width: '100%', minHeight: 'var(--touch-target-min)' }}
+          >
+            Log a brew
+          </button>
+        )}
+      </div>
+
+      <BrewTimeline
+        coffeeId={coffee.id}
+        refreshToken={refreshToken}
+        onLogFirst={() => setRecording(true)}
+      />
+    </>
+  )
 }

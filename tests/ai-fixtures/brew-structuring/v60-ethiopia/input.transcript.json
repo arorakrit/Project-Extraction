@@ -1,0 +1,6 @@
+{
+  "description": "Hand-crafted starter fixture: a natural spoken V60 brew note for an Ethiopian coffee. The transcript is raw recognized speech (no audio bytes). Values are illustrative; not from a real recorded API call.",
+  "source": "hand-crafted",
+  "replace_with_real_recording": true,
+  "transcript": "V60, eighteen grams in, three hundred out, medium-fine grind, ninety-four degrees, two and a half minutes, really bright and floral with a lemon finish"
+}

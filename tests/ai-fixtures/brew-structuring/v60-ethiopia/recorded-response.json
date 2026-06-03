@@ -1,0 +1,28 @@
+{
+  "id": "msg_fixture_brew_v60_ethiopia_001",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-4-6",
+  "stop_reason": "tool_use",
+  "content": [
+    {
+      "type": "tool_use",
+      "id": "toolu_fixture_brew_001",
+      "name": "record_brew_log",
+      "input": {
+        "brew_method": "V60",
+        "dose_g": 18,
+        "water_g": 300,
+        "ratio": null,
+        "grind": "medium-fine",
+        "water_temp_c": 94,
+        "total_time_s": 150,
+        "tasting_note": "really bright and floral with a lemon finish"
+      }
+    }
+  ],
+  "usage": {
+    "input_tokens": 420,
+    "output_tokens": 95
+  }
+}
