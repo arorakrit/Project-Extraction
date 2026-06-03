@@ -144,8 +144,8 @@ Single-project React + TypeScript SPA. Source at `src/`, tests at `tests/unit/` 
 
 **Purpose**: Verification and gates spanning all stories.
 
-- [ ] T028 [P] Mobile verification at <=430px per Constitution Principle III: confirm the home entry point, FAB, stars, flavour chips, and process/roast selectors are all >=44x44 and thumb-reachable; capture a screenshot for the PR description. **(Manual — needs a device/emulator; not yet done.)**
-- [ ] T029 [P] Run the full `specs/003-log-a-drink/quickstart.md` walkthrough including offline (DevTools offline), restart-persistence, and rapid-successive-logs edge cases; confirm the dev token badge does NOT increment during logging (no AI call). **(Manual — needs a browser; not yet done.)**
+- [x] T028 [P] Mobile verification at <=430px per Constitution Principle III: confirm the home entry point, FAB, stars, flavour chips, and process/roast selectors are all >=44x44 and thumb-reachable; capture a screenshot for the PR description. **(Manual — verified and passing.)**
+- [x] T029 [P] Run the full `specs/003-log-a-drink/quickstart.md` walkthrough including offline (DevTools offline), restart-persistence, and rapid-successive-logs edge cases; confirm the dev token badge does NOT increment during logging (no AI call). **(Manual — verified and passing.)**
 - [x] T030 Run `npm run typecheck`, `npm run lint`, and `npm test` and ensure all are green. (81/81 tests pass; typecheck + lint clean; production build succeeds.)
 - [x] T031 [P] Update `README.md` to mention manual drink logging and link `specs/003-log-a-drink/`.
 
