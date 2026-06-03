@@ -67,10 +67,46 @@ export function App() {
         margin: '0 auto',
       }}
     >
+      <BrandHeader />
       <main style={{ flex: 1 }}>{body}</main>
       {showFab && <LogDrinkFab />}
       <Nav route={route} />
     </div>
+  )
+}
+
+/** Cup'd wordmark — the app's identity (jade apostrophe). */
+function BrandHeader() {
+  return (
+    <header
+      style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 5,
+        padding: 'var(--space-3) var(--space-4)',
+        borderBottom: '0.5px solid var(--color-border-tertiary)',
+        background: 'var(--color-bg-primary)',
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => navigate('#/scan')}
+        aria-label="Cup'd — home"
+        className="font-display"
+        style={{
+          background: 'transparent',
+          border: 'none',
+          padding: 0,
+          minHeight: 'auto',
+          fontWeight: 800,
+          fontSize: '1.5rem',
+          letterSpacing: '-0.03em',
+          color: 'var(--color-text-primary)',
+        }}
+      >
+        Cup<span style={{ color: 'var(--color-accent)' }}>&rsquo;</span>d
+      </button>
+    </header>
   )
 }
 
@@ -132,7 +168,7 @@ function Nav({ route }: { route: Route }) {
             minHeight: 'var(--touch-target-min)',
             fontWeight: isActive(item.to) ? 600 : 400,
             color: isActive(item.to)
-              ? 'var(--color-text-primary)'
+              ? 'var(--color-accent)'
               : 'var(--color-text-secondary)',
             borderRadius: 0,
           }}

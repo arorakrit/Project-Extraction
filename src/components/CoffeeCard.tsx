@@ -82,16 +82,7 @@ export function CoffeeCard({ coffee, onDelete }: CoffeeCardProps) {
           }}
         >
           {notes.map(n => (
-            <span
-              key={n}
-              style={{
-                fontSize: 'var(--font-size-sm)',
-                padding: '4px 12px',
-                background: 'var(--color-bg-secondary)',
-                border: '0.5px solid var(--color-border-tertiary)',
-                borderRadius: 999,
-              }}
-            >
+            <span key={n} className="tag">
               {n}
             </span>
           ))}
@@ -220,9 +211,11 @@ function BrewGuide({ rec }: { rec: BrewRecommendation }) {
         Brew guide
       </h2>
       <p
+        className="data"
         style={{
           margin: '0 0 var(--space-2)',
           fontSize: 'var(--font-size-base)',
+          color: 'var(--color-accent)',
         }}
       >
         {summary}

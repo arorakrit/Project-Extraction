@@ -32,35 +32,36 @@ export function CoffeeList({ coffees, onSelect }: CoffeeListProps) {
           color: 'var(--color-text-secondary)',
         }}
       >
-        <p style={{ margin: 0 }}>No coffees yet — scan a bag to get started.</p>
+        <p style={{ margin: 0 }}>Nothing here yet — scan a bag and start your shelf.</p>
       </div>
     )
   }
 
   return (
-    <div>
+    <div
+      style={{ padding: '0 var(--space-4) var(--space-8)', maxWidth: 430, margin: '0 auto' }}
+    >
       {coffees.map(c => (
         <button
           type="button"
           key={c.id}
           onClick={() => onSelect(c.id)}
+          className="card card--accent"
           style={{
             display: 'block',
             width: '100%',
             textAlign: 'left',
-            padding: 'var(--space-3) var(--space-4)',
-            background: 'transparent',
-            border: 'none',
-            borderBottom: '0.5px solid var(--color-border-tertiary)',
-            borderRadius: 0,
+            marginBottom: 'var(--space-3)',
             minHeight: 'var(--touch-target-min)',
           }}
         >
           <p
+            className="font-display"
             style={{
-              margin: '0 0 2px',
-              fontWeight: 500,
-              fontSize: 'var(--font-size-base)',
+              margin: '0 0 4px',
+              fontWeight: 700,
+              fontSize: '1.25rem',
+              lineHeight: 1.1,
               color: 'var(--color-text-primary)',
             }}
           >

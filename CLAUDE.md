@@ -13,24 +13,27 @@ are NON-NEGOTIABLE.
 retry), `store/` (IndexedDB via `idb`: `coffees` + `settings`), mobile-first
 `components/` + `views/`, BYOK key in Settings. `002-voice-brew-logging` — speak a
 brew note → structured brew log; added the `brews` store (`DB_VERSION` 2,
-`by_coffee` index) and the `structure_brew_note` Claude call.
+`by_coffee` index) and the `structure_brew_note` Claude call. `003-log-a-drink` —
+fast manual drink logging → standalone `drinks` store (`DB_VERSION` 3) + `#/log`
+form and `#/drinks` history (PR #5).
 
-**Active feature**: `003-log-a-drink` — fast, fully manual drink logging at
-cafés/events → standalone tasting journal. NO AI call (G2/G5 N/A).
-- Spec: [specs/003-log-a-drink/spec.md](specs/003-log-a-drink/spec.md)
-- Plan: [specs/003-log-a-drink/plan.md](specs/003-log-a-drink/plan.md)
-- Research (Phase 0): [specs/003-log-a-drink/research.md](specs/003-log-a-drink/research.md)
-- Data model: [specs/003-log-a-drink/data-model.md](specs/003-log-a-drink/data-model.md)
-- Quickstart: [specs/003-log-a-drink/quickstart.md](specs/003-log-a-drink/quickstart.md)
-- Contracts: [specs/003-log-a-drink/contracts/](specs/003-log-a-drink/contracts/)
+**Active feature**: `004-cupd-brand-refactor` — re-skin the whole app to the
+**Cup'd** identity from `cupd-brand-board.html`. Presentation-only; NO AI call
+(G2/G5 N/A).
+- Spec: [specs/004-cupd-brand-refactor/spec.md](specs/004-cupd-brand-refactor/spec.md)
+- Plan: [specs/004-cupd-brand-refactor/plan.md](specs/004-cupd-brand-refactor/plan.md)
+- Research (Phase 0): [specs/004-cupd-brand-refactor/research.md](specs/004-cupd-brand-refactor/research.md)
+- Data model: [specs/004-cupd-brand-refactor/data-model.md](specs/004-cupd-brand-refactor/data-model.md)
+- Quickstart: [specs/004-cupd-brand-refactor/quickstart.md](specs/004-cupd-brand-refactor/quickstart.md)
+- Contracts: [specs/004-cupd-brand-refactor/contracts/](specs/004-cupd-brand-refactor/contracts/)
 
-**003 key touchpoints** (per plan.md; enumerated as tasks by `/speckit-tasks`):
-1. IndexedDB `DB_VERSION` 2 → 3: new standalone `drinks` store (no FK, no index; forward-only).
-2. New `src/store/drinks.ts` (`makeDrinkLog` factory + CRUD + `listVenues`) and
-   `src/lib/flavours.ts` (fixed 6-tag palette, max 3). No Zod (no AI output).
-3. Mobile-first UI: `#/log` form (star rating required, venue type-ahead, flavour
-   picker) + `#/drinks` history tab + home entry point + persistent FAB.
-4. Rating is the only required field; everything works offline with no account.
+**004 key touchpoints** (per plan.md; enumerated as tasks by `/speckit-tasks`):
+1. Token-first: redefine `style.css` `:root` to "Cupping Room After Dark" (Ink/Slate/
+   Bone/Jade); add `--font-display/-body/-mono`; retire the light theme (dark-only).
+2. Bundle 3 brand faces offline via `@fontsource-variable/*` (no Google CDN — Principle IV).
+3. Targeted component edits: type roles, the jade-edge slate card anatomy, mono data,
+   the Cup'd wordmark, and second-person voice copy. No component hardcodes colours/fonts.
+4. Preserve all behaviour (existing tests stay green), 44×44 targets, ≤430px, WCAG AA.
 
 When in doubt about a tradeoff, the constitution wins.
 <!-- SPECKIT END -->
