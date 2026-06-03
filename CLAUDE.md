@@ -11,22 +11,26 @@ are NON-NEGOTIABLE.
 **Shipped**: `001-scan-bag-to-card` — photograph a bag → coffee card (merged to
 `main`). Established the `src/` layout: `ai/` (tool-use + Zod schemas, telemetry,
 retry), `store/` (IndexedDB via `idb`: `coffees` + `settings`), mobile-first
-`components/` + `views/`, BYOK key in Settings.
+`components/` + `views/`, BYOK key in Settings. `002-voice-brew-logging` — speak a
+brew note → structured brew log; added the `brews` store (`DB_VERSION` 2,
+`by_coffee` index) and the `structure_brew_note` Claude call.
 
-**Active feature**: `002-voice-brew-logging` — speak a brew note from a coffee
-card → structured brew log entry; timeline on the coffee detail view.
-- Spec: [specs/002-voice-brew-logging/spec.md](specs/002-voice-brew-logging/spec.md)
-- Plan: [specs/002-voice-brew-logging/plan.md](specs/002-voice-brew-logging/plan.md)
-- Research (Phase 0): [specs/002-voice-brew-logging/research.md](specs/002-voice-brew-logging/research.md)
-- Data model: [specs/002-voice-brew-logging/data-model.md](specs/002-voice-brew-logging/data-model.md)
-- Quickstart: [specs/002-voice-brew-logging/quickstart.md](specs/002-voice-brew-logging/quickstart.md)
-- Contracts: [specs/002-voice-brew-logging/contracts/](specs/002-voice-brew-logging/contracts/)
+**Active feature**: `003-log-a-drink` — fast, fully manual drink logging at
+cafés/events → standalone tasting journal. NO AI call (G2/G5 N/A).
+- Spec: [specs/003-log-a-drink/spec.md](specs/003-log-a-drink/spec.md)
+- Plan: [specs/003-log-a-drink/plan.md](specs/003-log-a-drink/plan.md)
+- Research (Phase 0): [specs/003-log-a-drink/research.md](specs/003-log-a-drink/research.md)
+- Data model: [specs/003-log-a-drink/data-model.md](specs/003-log-a-drink/data-model.md)
+- Quickstart: [specs/003-log-a-drink/quickstart.md](specs/003-log-a-drink/quickstart.md)
+- Contracts: [specs/003-log-a-drink/contracts/](specs/003-log-a-drink/contracts/)
 
-**002 key touchpoints** (per plan.md; enumerated as tasks by `/speckit-tasks`):
-1. IndexedDB `DB_VERSION` 1 → 2: new `brews` store + `by_coffee` index (forward-only).
-2. New Claude call `structure_brew_note` (one per brew log) via existing `callClaudeTool`.
-3. Voice via Web Speech API (`src/lib/speech.ts`), feature-detected; manual fallback.
-4. `deleteCoffee` cascades to brews; telemetry gains `input_text_chars`.
+**003 key touchpoints** (per plan.md; enumerated as tasks by `/speckit-tasks`):
+1. IndexedDB `DB_VERSION` 2 → 3: new standalone `drinks` store (no FK, no index; forward-only).
+2. New `src/store/drinks.ts` (`makeDrinkLog` factory + CRUD + `listVenues`) and
+   `src/lib/flavours.ts` (fixed 6-tag palette, max 3). No Zod (no AI output).
+3. Mobile-first UI: `#/log` form (star rating required, venue type-ahead, flavour
+   picker) + `#/drinks` history tab + home entry point + persistent FAB.
+4. Rating is the only required field; everything works offline with no account.
 
 When in doubt about a tradeoff, the constitution wins.
 <!-- SPECKIT END -->

@@ -13,6 +13,7 @@ import {
 } from '@/ai/client'
 import { navigate, setPendingRoute } from '@/App'
 import { addCoffee, type SavedCoffee } from '@/store/coffees'
+import { LogDrinkEntry } from '@/components/LogDrinkEntry'
 
 type ErrorReason = 'no_text' | 'network' | 'schema'
 
@@ -111,11 +112,16 @@ export function ScanView() {
     case 'idle':
     case 'extracting':
       return (
-        <Scanner
-          status={state.kind === 'extracting' ? 'extracting' : 'idle'}
-          onCapture={handleCapture}
-          onManualEntry={() => setState({ kind: 'manual' })}
-        />
+        <>
+          <Scanner
+            status={state.kind === 'extracting' ? 'extracting' : 'idle'}
+            onCapture={handleCapture}
+            onManualEntry={() => setState({ kind: 'manual' })}
+          />
+          {state.kind === 'idle' && (
+            <LogDrinkEntry onClick={() => navigate('#/log')} />
+          )}
+        </>
       )
   }
 }

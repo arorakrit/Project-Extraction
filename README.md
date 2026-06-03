@@ -2,7 +2,11 @@
 
 A mobile-first specialty-coffee discovery and brew-logging app. Photograph a
 coffee bag → Claude extracts a structured coffee card; speak a brew note → it's
-transcribed and structured into a brew log on the coffee's timeline.
+transcribed and structured into a brew log on the coffee's timeline; or just
+tap **Log a drink** to record a quick tasting at a café or event — a star
+rating, optional venue/flavour notes — saved to your drink history in seconds,
+no AI and no account required. See
+[`specs/003-log-a-drink/`](specs/003-log-a-drink/).
 
 - **Stack:** React + TypeScript + Vite (single-page app)
 - **AI:** Claude `claude-sonnet-4-6` via tool use, with Zod-validated schemas
