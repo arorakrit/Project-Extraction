@@ -17,23 +17,21 @@ const ROAST_LABELS: Record<string, string> = {
   dark: 'Dark roast',
 }
 
-function stars(rating: number): string {
-  return '★'.repeat(rating) + '☆'.repeat(5 - rating)
-}
-
 function formatWhen(iso: string): string {
   const d = new Date(iso)
   return Number.isNaN(d.getTime())
     ? iso
-    : d.toLocaleString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-      })
+    : d
+        .toLocaleString(undefined, {
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        })
+        .toUpperCase()
 }
 
-/** One drink-history row: rating, name, venue, detail, flavour tags, time. */
+/** One drink-history row, as the Cup'd "log card". */
 export function DrinkCard({ drink }: DrinkCardProps) {
   const meta = [
     drink.origin_country,
@@ -43,29 +41,54 @@ export function DrinkCard({ drink }: DrinkCardProps) {
 
   return (
     <div
-      style={{
-        padding: 'var(--space-3) var(--space-4)',
-        borderBottom: '0.5px solid var(--color-border-tertiary)',
-      }}
+      className="card card--accent"
+      style={{ marginBottom: 'var(--space-3)' }}
     >
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'baseline',
+          alignItems: 'flex-start',
           gap: 'var(--space-2)',
+          marginBottom: 'var(--space-2)',
         }}
       >
-        <span
-          aria-label={`${drink.rating} out of 5 stars`}
-          style={{ color: 'var(--color-accent)', letterSpacing: 1 }}
-        >
-          {stars(drink.rating)}
-        </span>
+        {drink.venue ? (
+          <span
+            className="data"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              textTransform: 'uppercase',
+              fontSize: '0.68rem',
+              color: 'var(--color-text-secondary)',
+            }}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              style={{
+                width: 12,
+                height: 12,
+                stroke: 'var(--color-accent)',
+                fill: 'none',
+                strokeWidth: 1.5,
+              }}
+            >
+              <path d="M12 21s-7-6.3-7-11a7 7 0 1114 0c0 4.7-7 11-7 11z" />
+              <circle cx="12" cy="10" r="2.4" />
+            </svg>
+            {drink.venue}
+          </span>
+        ) : (
+          <span />
+        )}
         <time
+          className="data"
           dateTime={drink.logged_at}
           style={{
-            fontSize: 'var(--font-size-sm)',
+            fontSize: '0.66rem',
             color: 'var(--color-text-tertiary)',
             whiteSpace: 'nowrap',
           }}
@@ -75,31 +98,22 @@ export function DrinkCard({ drink }: DrinkCardProps) {
       </div>
 
       <p
+        className="font-display"
         style={{
-          margin: 'var(--space-1) 0 0',
-          fontWeight: 500,
+          margin: 0,
+          fontWeight: 700,
+          fontSize: '1.4rem',
+          lineHeight: 1.1,
           color: 'var(--color-text-primary)',
         }}
       >
         {drink.coffee_name ?? 'Untitled drink'}
       </p>
 
-      {drink.venue && (
-        <p
-          style={{
-            margin: '2px 0 0',
-            fontSize: 'var(--font-size-sm)',
-            color: 'var(--color-text-secondary)',
-          }}
-        >
-          {drink.venue}
-        </p>
-      )}
-
       {meta.length > 0 && (
         <p
           style={{
-            margin: '2px 0 0',
+            margin: 'var(--space-1) 0 0',
             fontSize: 'var(--font-size-sm)',
             color: 'var(--color-text-secondary)',
           }}
@@ -108,26 +122,32 @@ export function DrinkCard({ drink }: DrinkCardProps) {
         </p>
       )}
 
+      <p
+        className="data"
+        style={{
+          margin: 'var(--space-3) 0 0',
+          fontWeight: 700,
+          fontSize: '1.05rem',
+          color: 'var(--color-accent)',
+        }}
+      >
+        {drink.rating.toFixed(1)}{' '}
+        <span style={{ color: 'var(--color-text-secondary)', fontWeight: 400 }}>
+          / 5.0
+        </span>
+      </p>
+
       {drink.flavour_tags.length > 0 && (
         <div
           style={{
             display: 'flex',
             flexWrap: 'wrap',
-            gap: 'var(--space-1)',
-            marginTop: 'var(--space-2)',
+            gap: 'var(--space-2)',
+            marginTop: 'var(--space-3)',
           }}
         >
           {drink.flavour_tags.map(tag => (
-            <span
-              key={tag}
-              style={{
-                fontSize: 'var(--font-size-sm)',
-                padding: '2px 10px',
-                borderRadius: 999,
-                background: 'var(--color-bg-secondary)',
-                color: 'var(--color-text-secondary)',
-              }}
-            >
+            <span key={tag} className="tag">
               {FLAVOUR_LABELS[tag]}
             </span>
           ))}

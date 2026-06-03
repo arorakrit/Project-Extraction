@@ -36,16 +36,19 @@ export function FlavourTagPicker({ value, onChange }: FlavourTagPickerProps) {
               disabled={disabled}
               onClick={() => toggle(tag)}
               style={{
-                fontSize: 'var(--font-size-sm)',
+                fontFamily: 'var(--font-mono)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                fontSize: '0.7rem',
                 padding: 'var(--space-2) var(--space-3)',
                 minHeight: 'var(--touch-target-min)',
                 borderRadius: 999,
                 border: selected
                   ? '0.5px solid var(--color-accent)'
-                  : '0.5px solid var(--color-border-tertiary)',
+                  : '0.5px solid var(--color-border-primary)',
                 background: selected
                   ? 'var(--color-accent)'
-                  : 'var(--color-bg-secondary)',
+                  : 'transparent',
                 color: selected
                   ? 'var(--color-bg-primary)'
                   : 'var(--color-text-primary)',

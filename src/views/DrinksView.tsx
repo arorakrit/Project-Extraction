@@ -36,7 +36,7 @@ export function DrinksView() {
           }}
         >
           <p style={{ margin: '0 0 var(--space-4)' }}>
-            No drinks logged yet.
+            Nothing logged yet. What did you cup today?
           </p>
           <button
             type="button"
@@ -47,7 +47,17 @@ export function DrinksView() {
           </button>
         </div>
       ) : (
-        drinks.map(drink => <DrinkCard key={drink.id} drink={drink} />)
+        <div
+          style={{
+            padding: '0 var(--space-4) var(--space-8)',
+            maxWidth: 430,
+            margin: '0 auto',
+          }}
+        >
+          {drinks.map(drink => (
+            <DrinkCard key={drink.id} drink={drink} />
+          ))}
+        </div>
       )}
     </div>
   )

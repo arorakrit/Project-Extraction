@@ -169,10 +169,11 @@ export function BrewTimeline({
                     gap: 'var(--space-2)',
                   }}
                 >
-                  <span style={{ color: 'var(--color-text-primary)' }}>
+                  <span className="data" style={{ color: 'var(--color-text-primary)' }}>
                     {summaryLine(eff)}
                   </span>
                   <span
+                    className="data"
                     style={{
                       color: 'var(--color-text-tertiary)',
                       fontSize: 'var(--font-size-sm)',
