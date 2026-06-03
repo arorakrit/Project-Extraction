@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { BrewReview } from '@/components/BrewReview'
 import { BrewEntryForm } from '@/components/BrewEntryForm'
 import {
@@ -7,8 +7,30 @@ import {
   ClaudeNetworkError,
   ClaudeSchemaError,
 } from '@/ai/client'
-import { transcribeOnce, isSpeechRecognitionAvailable } from '@/lib/speech'
+import {
+  startTranscription,
+  isSpeechRecognitionAvailable,
+  SpeechRecognitionFailedError,
+  type TranscriptionSession,
+} from '@/lib/speech'
 import type { StructuredBrew } from '@/ai/schemas/brew'
+
+/** Map a SpeechRecognition error code to a user-facing reason. */
+function speechErrorMessage(code: string | null): string {
+  switch (code) {
+    case 'not-allowed':
+    case 'service-not-allowed':
+      return 'Microphone access is blocked. Allow it in your browser’s site settings, or enter by hand.'
+    case 'audio-capture':
+      return 'No microphone was found. Enter it by hand instead.'
+    case 'network':
+      return 'Speech recognition needs an internet connection. Try again, or enter by hand.'
+    case 'no-speech':
+      return 'Didn’t hear anything. Try again, or enter by hand.'
+    default:
+      return 'Something went wrong capturing that brew.'
+  }
+}
 
 interface BrewRecorderProps {
   coffeeId: string
@@ -33,15 +55,31 @@ export function BrewRecorder({ coffeeId, onSaved, onClose }: BrewRecorderProps) 
   const [structured, setStructured] = useState<StructuredBrew | null>(null)
   const [transcript, setTranscript] = useState<string | null>(null)
   const [manualPrefill, setManualPrefill] = useState<string | null>(null)
+  const [errorReason, setErrorReason] = useState<string | null>(null)
+  const [interim, setInterim] = useState('')
+  const sessionRef = useRef<TranscriptionSession | null>(null)
+
+  function handleStop(): void {
+    sessionRef.current?.stop()
+  }
 
   async function handleRecord(): Promise<void> {
+    setInterim('')
     setMode('listening')
     let spoken: string
     try {
-      spoken = await transcribeOnce()
-    } catch {
+      const session = startTranscription({ onInterim: setInterim })
+      sessionRef.current = session
+      spoken = await session.done
+    } catch (err) {
+      console.error('[BrewRecorder] speech recognition failed:', err)
+      setErrorReason(
+        err instanceof SpeechRecognitionFailedError ? err.code : null,
+      )
       setMode('error')
       return
+    } finally {
+      sessionRef.current = null
     }
 
     // Empty/whitespace transcript: short-circuit to "didn't catch that"
@@ -70,6 +108,8 @@ export function BrewRecorder({ coffeeId, onSaved, onClose }: BrewRecorderProps) 
         setManualPrefill(spoken)
         setMode('manual')
       } else {
+        console.error('[BrewRecorder] structuring failed:', err)
+        setErrorReason(null)
         setMode('error')
       }
     }
@@ -107,42 +147,66 @@ export function BrewRecorder({ coffeeId, onSaved, onClose }: BrewRecorderProps) 
         textAlign: 'center',
       }}
     >
-      {(mode === 'idle' || mode === 'listening' || mode === 'structuring') && (
+      {mode === 'idle' && (
         <>
           <button
             type="button"
             className="primary"
             onClick={() => void handleRecord()}
-            disabled={mode === 'listening' || mode === 'structuring'}
+            style={{ width: '100%', minHeight: 56, fontSize: 'var(--font-size-lg)' }}
+          >
+            Record brew
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('manual')}
+            style={{ marginTop: 'var(--space-3)', width: '100%' }}
+          >
+            Enter by hand
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{ marginTop: 'var(--space-3)', width: '100%' }}
+          >
+            Cancel
+          </button>
+        </>
+      )}
+
+      {mode === 'listening' && (
+        <>
+          <button
+            type="button"
+            className="primary"
+            onClick={handleStop}
+            style={{ width: '100%', minHeight: 56, fontSize: 'var(--font-size-lg)' }}
+          >
+            Stop
+          </button>
+          <p
             style={{
-              width: '100%',
-              minHeight: 56,
-              fontSize: 'var(--font-size-lg)',
+              margin: 'var(--space-3) 0 0',
+              minHeight: '1.5em',
+              color: interim
+                ? 'var(--color-text-primary)'
+                : 'var(--color-text-secondary)',
             }}
           >
-            {mode === 'idle' && 'Record brew'}
-            {mode === 'listening' && 'Listening…'}
-            {mode === 'structuring' && 'Sorting it out…'}
-          </button>
-          {mode === 'idle' && (
-            <>
-              <button
-                type="button"
-                onClick={() => setMode('manual')}
-                style={{ marginTop: 'var(--space-3)', width: '100%' }}
-              >
-                Enter by hand
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                style={{ marginTop: 'var(--space-3)', width: '100%' }}
-              >
-                Cancel
-              </button>
-            </>
-          )}
+            {interim || 'Listening… speak your brew, then tap Stop.'}
+          </p>
         </>
+      )}
+
+      {mode === 'structuring' && (
+        <button
+          type="button"
+          className="primary"
+          disabled
+          style={{ width: '100%', minHeight: 56, fontSize: 'var(--font-size-lg)' }}
+        >
+          Sorting it out…
+        </button>
       )}
 
       {mode === 'empty' && (
@@ -174,7 +238,7 @@ export function BrewRecorder({ coffeeId, onSaved, onClose }: BrewRecorderProps) 
       {mode === 'error' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
           <p style={{ margin: 0, color: 'var(--color-text-secondary)' }}>
-            Something went wrong capturing that brew.
+            {speechErrorMessage(errorReason)}
           </p>
           <button
             type="button"

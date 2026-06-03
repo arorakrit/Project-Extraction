@@ -30,45 +30,90 @@ export class SpeechRecognitionFailedError extends Error {
   }
 }
 
+export interface TranscriptionSession {
+  /** Resolves with the final transcript once recognition ends (user stop or device end). */
+  readonly done: Promise<string>
+  /** Finalize capture. Safe to call more than once. */
+  stop: () => void
+}
+
 /**
- * Run a single recognition session and resolve with the best transcript.
- * Rejects with SpeechUnavailableError when the API is absent, or
+ * Begin a continuous recognition session the caller stops explicitly.
+ *
+ * Continuous mode keeps listening through natural pauses (a non-continuous
+ * session ends at the first pause and truncates the note). The session runs
+ * until the user taps stop — there is no silence timer guessing when they are
+ * done. `onInterim` streams the best-so-far transcript so the UI can show what
+ * is being heard. `done` resolves with the finalized transcript (SC-001).
+ *
+ * `done` rejects with SpeechUnavailableError when the API is absent, or
  * SpeechRecognitionFailedError on a recognition error (e.g. denied mic).
  */
-export function transcribeOnce(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const Ctor = getRecognitionCtor()
-    if (!Ctor) {
-      reject(new SpeechUnavailableError())
+export function startTranscription(options?: {
+  onInterim?: (text: string) => void
+}): TranscriptionSession {
+  const Ctor = getRecognitionCtor()
+  if (!Ctor) {
+    return { done: Promise.reject(new SpeechUnavailableError()), stop: () => {} }
+  }
+
+  const recognition = new Ctor()
+  recognition.lang = 'en-US'
+  recognition.continuous = true
+  recognition.interimResults = true
+  recognition.maxAlternatives = 1
+
+  let settled = false
+  let transcript = ''
+  let resolveDone!: (value: string) => void
+  let rejectDone!: (reason: unknown) => void
+  const done = new Promise<string>((resolve, reject) => {
+    resolveDone = resolve
+    rejectDone = reject
+  })
+
+  recognition.onresult = (event: SpeechRecognitionEvent) => {
+    let interim = ''
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const result = event.results[i]
+      if (!result) continue
+      const alternative = result[0]
+      if (!alternative) continue
+      if (result.isFinal) transcript += alternative.transcript
+      else interim += alternative.transcript
+    }
+    options?.onInterim?.((transcript + interim).trim())
+  }
+
+  recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+    if (settled) return
+    const code = event.error ?? 'unknown'
+    // A 'no-speech' tail after we already captured words isn't a failure.
+    if (code === 'no-speech' && transcript.trim() !== '') {
+      settled = true
+      resolveDone(transcript.trim())
       return
     }
+    settled = true
+    rejectDone(new SpeechRecognitionFailedError(code))
+  }
 
-    const recognition = new Ctor()
-    recognition.lang = 'en-US'
-    recognition.continuous = false
-    recognition.interimResults = false
-    recognition.maxAlternatives = 1
+  recognition.onend = () => {
+    if (settled) return
+    settled = true
+    resolveDone(transcript.trim())
+  }
 
-    let settled = false
-    let transcript = ''
+  recognition.start()
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      const alternative = event.results[0]?.[0]
-      transcript = alternative?.transcript ?? ''
-    }
-
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      if (settled) return
-      settled = true
-      reject(new SpeechRecognitionFailedError(event.error ?? 'unknown'))
-    }
-
-    recognition.onend = () => {
-      if (settled) return
-      settled = true
-      resolve(transcript.trim())
-    }
-
-    recognition.start()
-  })
+  return {
+    done,
+    stop: () => {
+      try {
+        recognition.stop()
+      } catch {
+        // Already stopped; onend will settle `done`.
+      }
+    },
+  }
 }
