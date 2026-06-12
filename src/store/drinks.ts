@@ -156,6 +156,34 @@ export async function deleteDrink(id: string): Promise<void> {
 }
 
 /**
+ * All drinks at one venue, newest first (feature 006 FR-006/FR-007).
+ * Matching is case-insensitive on trimmed names — the same identity rule as
+ * listVenues() — so "blue bottle " finds "Blue Bottle". `null` returns the
+ * "No café" bucket: every drink logged without a venue.
+ */
+export async function listDrinksByVenue(
+  venue: string | null,
+): Promise<DrinkLog[]> {
+  const drinks = await listDrinks() // already newest-first
+  if (venue === null) return drinks.filter(d => d.venue === null)
+  const key = venue.trim().toLowerCase()
+  return drinks.filter(d => d.venue !== null && d.venue.toLowerCase() === key)
+}
+
+/**
+ * Resolve a spoken/typed venue against existing venues (006 FR-015): a
+ * case-insensitive trimmed match adopts the stored casing so voice input
+ * never creates a near-duplicate café; otherwise the input is kept verbatim
+ * (trimmed), exactly like a free-typed new venue.
+ */
+export async function resolveVenueCasing(spoken: string): Promise<string> {
+  const trimmed = spoken.trim()
+  const key = trimmed.toLowerCase()
+  const venues = await listVenues()
+  return venues.find(v => v.toLowerCase() === key) ?? trimmed
+}
+
+/**
  * Distinct, non-null, trimmed venue strings across all drinks, de-duplicated
  * case-insensitively (first-seen casing kept), ordered most-recent first.
  * Powers the VenueInput type-ahead (FR-004/FR-005).

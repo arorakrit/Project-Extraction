@@ -1,5 +1,9 @@
 export interface TelemetryRecord {
-  call: 'extract_coffee_label' | 'enrich_coffee_profile' | 'structure_brew_note'
+  call:
+    | 'extract_coffee_label'
+    | 'enrich_coffee_profile'
+    | 'structure_brew_note'
+    | 'structure_drink_note'
   model_id: 'claude-sonnet-4-6'
   status: 'ok' | 'retry_then_ok' | 'schema_error' | 'network_error'
   latency_ms: number
