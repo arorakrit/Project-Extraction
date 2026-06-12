@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { clearApiKey, getApiKey, setApiKey } from '@/store/settings'
+import { clearApiKey, setApiKey } from '@/store/settings'
+import { resolveApiKey, type KeySource } from '@/lib/apiKey'
 import { aggregateTokens, getSession } from '@/lib/telemetry'
 
 interface SettingsProps {
@@ -9,11 +10,18 @@ interface SettingsProps {
 export function Settings({ onSaved }: SettingsProps) {
   const [key, setKey] = useState('')
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
-  const [hasKey, setHasKey] = useState(false)
+  // 005 FR-005: show which credential is active (personal / built-in / none)
+  // without ever rendering the built-in key's value.
+  const [source, setSource] = useState<KeySource>('none')
   const [aggregate, setAggregate] = useState(aggregateTokens())
 
+  async function refreshSource(): Promise<void> {
+    const { source: resolved } = await resolveApiKey()
+    setSource(resolved)
+  }
+
   useEffect(() => {
-    void getApiKey().then(k => setHasKey(!!k))
+    void refreshSource()
   }, [])
 
   useEffect(() => {
@@ -27,7 +35,7 @@ export function Settings({ onSaved }: SettingsProps) {
     if (!trimmed) return
     setStatus('saving')
     await setApiKey(trimmed)
-    setHasKey(true)
+    await refreshSource()
     setKey('')
     setStatus('saved')
     onSaved?.()
@@ -35,7 +43,9 @@ export function Settings({ onSaved }: SettingsProps) {
 
   async function handleClear(): Promise<void> {
     await clearApiKey()
-    setHasKey(false)
+    // FR-004: clearing the personal key reverts to the built-in key when the
+    // build carries one, otherwise to the no-key state.
+    await refreshSource()
     setStatus('idle')
   }
 
@@ -56,12 +66,24 @@ export function Settings({ onSaved }: SettingsProps) {
           }}
         >
           Anthropic API key
-          {hasKey && (
+          {source === 'personal' && (
             <span style={{ marginLeft: 'var(--space-2)', color: 'var(--color-text-tertiary)' }}>
               (saved — paste again to overwrite)
             </span>
           )}
         </label>
+        {source === 'built-in' && (
+          <p
+            style={{
+              margin: '0 0 var(--space-2)',
+              fontSize: 'var(--font-size-sm)',
+              color: 'var(--color-text-tertiary)',
+            }}
+          >
+            This build includes a built-in key — AI features already work.
+            Saving your own key here overrides it.
+          </p>
+        )}
         <input
           id="anthropic-key"
           type="password"
@@ -79,7 +101,7 @@ export function Settings({ onSaved }: SettingsProps) {
           >
             {status === 'saving' ? 'Saving…' : status === 'saved' ? 'Saved' : 'Save'}
           </button>
-          {hasKey && (
+          {source === 'personal' && (
             <button type="button" onClick={handleClear}>
               Clear
             </button>

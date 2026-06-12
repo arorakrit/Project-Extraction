@@ -1,6 +1,6 @@
 import type { ZodTypeAny, z } from 'zod'
 import { zodToJsonSchema } from 'zod-to-json-schema'
-import { getApiKey } from '@/store/settings'
+import { resolveApiKey, type KeySource } from '@/lib/apiKey'
 import { record as recordTelemetry, type TelemetryRecord } from '@/lib/telemetry'
 import { retryOnce } from '@/lib/retry'
 import { resizeForVision } from '@/lib/image'
@@ -53,10 +53,13 @@ export class MissingApiKeyError extends Error {
 
 export class ClaudeNetworkError extends Error {
   public readonly status: number
-  constructor(message: string, status: number) {
+  /** Which credential was attached to the failed request (005 FR-008). */
+  public readonly keySource: KeySource
+  constructor(message: string, status: number, keySource: KeySource) {
     super(message)
     this.name = 'ClaudeNetworkError'
     this.status = status
+    this.keySource = keySource
   }
 }
 
@@ -120,15 +123,16 @@ export interface CallClaudeToolArgs<S extends ZodTypeAny> {
 
 /**
  * Generic Claude tool-use wrapper. All Claude calls in the app go through
- * this function so the retry policy, telemetry, and BYOK key handling stay
- * in one place. Per constitution Principle II: the JSON Schema sent to
- * Claude is derived from the Zod object via zod-to-json-schema — never
- * hand-written.
+ * this function so the retry policy, telemetry, and key handling stay in
+ * one place. The credential comes from resolveApiKey() — personal (BYOK)
+ * key first, then the build-time built-in key (005). Per constitution
+ * Principle II: the JSON Schema sent to Claude is derived from the Zod
+ * object via zod-to-json-schema — never hand-written.
  */
 export async function callClaudeTool<S extends ZodTypeAny>(
   args: CallClaudeToolArgs<S>,
 ): Promise<z.infer<S>> {
-  const apiKey = await getApiKey()
+  const { key: apiKey, source: keySource } = await resolveApiKey()
   if (!apiKey) throw new MissingApiKeyError()
 
   const inputSchema = zodToJsonSchema(args.schema, { target: 'jsonSchema7' })
@@ -167,6 +171,7 @@ export async function callClaudeTool<S extends ZodTypeAny>(
       throw new ClaudeNetworkError(
         `Anthropic API returned ${res.status}: ${text.slice(0, 200)}`,
         res.status,
+        keySource,
       )
     }
 
@@ -241,7 +246,7 @@ export async function callClaudeTool<S extends ZodTypeAny>(
  * Extract structured label fields from a coffee bag photo.
  *
  * Throws:
- *   - MissingApiKeyError if no BYOK key is configured
+ *   - MissingApiKeyError if no key is available (neither personal nor built-in)
  *   - ClaudeNetworkError on non-2xx HTTP response
  *   - ClaudeSchemaError if the model's tool_use input fails Zod validation
  *     twice in a row (per Principle V retry policy)
@@ -293,7 +298,7 @@ function stripDataUrlPrefix(dataUrl: string): string {
  * blocking error.
  *
  * Throws:
- *   - MissingApiKeyError if no BYOK key is configured
+ *   - MissingApiKeyError if no key is available (neither personal nor built-in)
  *   - ClaudeNetworkError on non-2xx HTTP response
  *   - ClaudeSchemaError if the model's tool_use input fails Zod validation twice
  */
@@ -321,7 +326,7 @@ export async function enrichCoffeeProfile(
  * one Claude call per brew log (constitution Principle V). Text-only: no image.
  *
  * Throws:
- *   - MissingApiKeyError if no BYOK key is configured
+ *   - MissingApiKeyError if no key is available (neither personal nor built-in)
  *   - ClaudeNetworkError on non-2xx HTTP response (caller falls back to the
  *     manual form pre-filled with the transcript — no data loss)
  *   - ClaudeSchemaError if the tool_use input fails Zod validation twice

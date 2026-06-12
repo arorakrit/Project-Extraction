@@ -9,7 +9,7 @@ import {
   type SavedCoffee,
   updateCoffee,
 } from '@/store/coffees'
-import { getApiKey } from '@/store/settings'
+import { resolveApiKey } from '@/lib/apiKey'
 import { enrichCoffeeProfile } from '@/ai/client'
 import { getCurrentRoute, navigate } from '@/App'
 
@@ -51,10 +51,12 @@ export function CoffeeView() {
     const effective = effectiveExtractedCoffee(coffee)
 
     void (async () => {
-      const apiKey = await getApiKey()
-      if (!apiKey) {
-        // No key → no enrichment attempt. Don't mark attempted so the user
-        // can still get enrichment on a later visit after configuring a key.
+      const { source } = await resolveApiKey()
+      if (source === 'none') {
+        // No key (personal or built-in) → no enrichment attempt. Don't mark
+        // attempted so the user can still get enrichment on a later visit
+        // after configuring a key. Enrichment failures (including a rejected
+        // built-in key) stay silent per the 001 enrichment contract.
         enrichingRef.current = false
         return
       }
