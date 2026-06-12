@@ -84,7 +84,7 @@ and testable.
 
 - [X] T014 [US3] Extend `tests/unit/components/settings.test.tsx`: with env unset (and with env blank/whitespace — FR-009), Settings renders today's copy verbatim with no built-in mention (FR-006)
 - [X] T015 [US3] Extend `tests/unit/ai/client.test.ts`: with no personal key and env unset/blank, `callClaudeTool` throws `MissingApiKeyError` with the unchanged message (FR-006, FR-009)
-- [ ] T016 [US3] Manual check per quickstart US3: keyless `npm run dev`, fresh profile → existing missing-key flow end-to-end, then save a personal key and confirm scan works (record result in PR description)
+- [X] T016 [US3] Manual check per quickstart US3: keyless `npm run dev`, fresh profile → existing missing-key flow end-to-end, then save a personal key and confirm scan works (record result in PR description) — ✅ verified by owner 2026-06-12 (keyless dev server via renamed `.env`; missing-key redirect, no built-in mentions, personal key unblocked scan)
 
 **Checkpoint**: All three stories independently verified
 
@@ -96,7 +96,7 @@ and testable.
 
 - [X] T017 [P] Run gates: `npm run typecheck`, `npm run lint`, `npm run test` — all green, zero changes to AI fixtures expected
 - [X] T018 [P] Final SC-003 scan per quickstart.md ("no key in committed source") across all tracked files before opening the PR
-- [ ] T019 Manual quickstart verification of US1 + US2 on a key-bearing dev build, including Settings at ≤ 430px viewport; attach mobile-viewport evidence (screenshot/note) to the PR description (Principle III)
+- [X] T019 Manual quickstart verification of US1 + US2 on a key-bearing dev build, including Settings at ≤ 430px viewport; attach mobile-viewport evidence (screenshot/note) to the PR description (Principle III) — ✅ verified by owner 2026-06-12: US1 zero-setup scan; FR-008 message exercised against the real API (revoked key → "built-in key was rejected"); US2 precedence (invalid personal key → generic error; Clear → built-in works); Settings checked at ≤ 430px
 - [ ] T020 PR description: link `specs/005-build-time-api-key/`, state calls-per-user-action unchanged and zero token-spend trend change (constitution cost audit), and include T016/T019 verification notes
 
 ---
