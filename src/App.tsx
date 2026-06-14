@@ -42,6 +42,17 @@ export function App() {
     body = <SettingsView />
   } else if (route === '#/library') {
     body = <LibraryView key={route} />
+  } else if (route.startsWith('#/drinks/at/')) {
+    // Venue-filtered history (006 FR-006). key forces re-mount between cafés.
+    body = (
+      <DrinksView
+        key={route}
+        venueFilter={decodeURIComponent(route.slice('#/drinks/at/'.length))}
+      />
+    )
+  } else if (route === '#/drinks/no-cafe') {
+    // The labelled "No café" grouping (006 FR-007).
+    body = <DrinksView key={route} venueFilter={null} />
   } else if (route === '#/drinks') {
     body = <DrinksView key={route} />
   } else if (route === '#/log') {

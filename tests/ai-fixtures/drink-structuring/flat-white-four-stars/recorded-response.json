@@ -1,0 +1,24 @@
+{
+  "id": "msg_fixture_drink_flat_white_001",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-4-6",
+  "stop_reason": "tool_use",
+  "content": [
+    {
+      "type": "tool_use",
+      "id": "toolu_fixture_drink_001",
+      "name": "record_drink_log",
+      "input": {
+        "venue": "Sunday's Coffee",
+        "coffee_name": "oat flat white",
+        "rating": 4,
+        "flavour_tags": ["fruity", "bright", "fruity"]
+      }
+    }
+  ],
+  "usage": {
+    "input_tokens": 410,
+    "output_tokens": 60
+  }
+}

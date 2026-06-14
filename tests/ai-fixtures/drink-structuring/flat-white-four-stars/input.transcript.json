@@ -1,0 +1,6 @@
+{
+  "description": "Hand-crafted starter fixture: a natural spoken drink note at a café — venue, drink, explicit star rating, and two palette flavours (one duplicated to exercise normalization). The transcript is raw recognized speech (no audio bytes). Values are illustrative; not from a real recorded API call.",
+  "source": "hand-crafted",
+  "replace_with_real_recording": true,
+  "transcript": "oat flat white at Sunday's Coffee, four stars, really fruity and bright, super fruity actually"
+}

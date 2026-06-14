@@ -33,6 +33,17 @@ import {
   BREW_TOOL_DESCRIPTION,
   buildBrewPrompt,
 } from '@/ai/prompts/brew'
+import {
+  VoiceDrinkDraftSchema,
+  normalizeDrinkDraft,
+  isEmptyDrinkDraft,
+  type VoiceDrinkDraft,
+} from '@/ai/schemas/drink'
+import {
+  DRINK_TOOL_NAME,
+  DRINK_TOOL_DESCRIPTION,
+  buildDrinkPrompt,
+} from '@/ai/prompts/drink'
 
 const ANTHROPIC_ENDPOINT = 'https://api.anthropic.com/v1/messages'
 const ANTHROPIC_VERSION = '2023-06-01'
@@ -43,6 +54,7 @@ export type ClaudeToolName =
   | 'record_coffee_label'
   | 'record_coffee_enrichment'
   | 'record_brew_log'
+  | 'record_drink_log'
 
 export class MissingApiKeyError extends Error {
   constructor() {
@@ -100,6 +112,13 @@ export class BrewEmptyError extends Error {
   constructor() {
     super("Didn't catch that — try again, or enter it by hand.")
     this.name = 'BrewEmptyError'
+  }
+}
+
+export class DrinkDraftEmptyError extends Error {
+  constructor() {
+    super("Didn't catch that — try again, or log it by hand.")
+    this.name = 'DrinkDraftEmptyError'
   }
 }
 
@@ -352,6 +371,43 @@ export async function structureBrewNote(
 
   if (isEmptyBrew(result)) throw new BrewEmptyError()
   return result
+}
+
+/**
+ * Structure a raw spoken drink description into a typed drink draft (006).
+ * Exactly one Claude call per voice-logged drink (constitution Principle V);
+ * manual logs make zero calls. Text-only: no image. The validated draft is
+ * deterministically normalized (tags deduped, capped at three) before return;
+ * it prefills the café-first form for review and is NEVER persisted directly.
+ *
+ * Throws:
+ *   - MissingApiKeyError if no key is available (neither personal nor built-in)
+ *   - ClaudeNetworkError on non-2xx HTTP response (caller keeps the transcript
+ *     visible in a retryable error state — no data loss)
+ *   - ClaudeSchemaError if the tool_use input fails Zod validation twice
+ *   - DrinkDraftEmptyError if schema-valid but nothing usable was heard (FR-016)
+ */
+export async function structureDrinkNote(
+  transcript: string,
+): Promise<VoiceDrinkDraft> {
+  const result = await callClaudeTool({
+    call: 'structure_drink_note',
+    tool: DRINK_TOOL_NAME,
+    toolDescription: DRINK_TOOL_DESCRIPTION,
+    schema: VoiceDrinkDraftSchema,
+    messages: [
+      {
+        role: 'user',
+        content: [{ type: 'text', text: buildDrinkPrompt(transcript) }],
+      },
+    ],
+    inputImageBytes: null,
+    inputTextChars: transcript.length,
+  })
+
+  const draft = normalizeDrinkDraft(result)
+  if (isEmptyDrinkDraft(draft)) throw new DrinkDraftEmptyError()
+  return draft
 }
 
 function mediaTypeFromDataUrl(
