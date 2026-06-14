@@ -1,5 +1,5 @@
 interface ErrorStateProps {
-  reason: 'no_text' | 'network' | 'schema'
+  reason: 'no_text' | 'network' | 'schema' | 'built_in_key_rejected'
   onRetry: () => void
   onManualEntry: () => void
 }
@@ -16,6 +16,12 @@ const MESSAGES: Record<ErrorStateProps['reason'], { headline: string; detail: st
   network: {
     headline: "Couldn't reach Claude",
     detail: 'Check your connection and try again, or enter the coffee manually.',
+  },
+  // 005 FR-008: name the failing credential when the build's built-in key
+  // is rejected, and point at the personal-key path.
+  built_in_key_rejected: {
+    headline: "This build's built-in key was rejected",
+    detail: 'Add your own key in Settings, or enter the coffee manually.',
   },
 }
 

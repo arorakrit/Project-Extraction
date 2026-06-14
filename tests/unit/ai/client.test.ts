@@ -60,7 +60,13 @@ describe('callClaudeTool', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+    vi.unstubAllEnvs()
   })
+
+  function sentApiKey(fetchMock: { mock: { calls: unknown[][] } }): unknown {
+    const init = fetchMock.mock.calls[0]?.[1] as RequestInit | undefined
+    return (init?.headers as Record<string, string> | undefined)?.['x-api-key']
+  }
 
   it('returns parsed result on first-attempt success', async () => {
     const fetchMock = vi
@@ -125,6 +131,65 @@ describe('callClaudeTool', () => {
 
   it('throws MissingApiKeyError when no key is configured', async () => {
     await clearApiKey()
+    await expect(invoke()).rejects.toBeInstanceOf(MissingApiKeyError)
+  })
+
+  // --- 005-build-time-api-key: key source resolution -----------------------
+
+  it('uses the built-in key when no personal key is saved (US1)', async () => {
+    await clearApiKey()
+    vi.stubEnv('VITE_ANTHROPIC_KEY', 'sk-ant-built')
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(jsonResponse(validResponse))
+
+    const result = await invoke()
+
+    expect(result).toEqual({ ok: true })
+    expect(sentApiKey(fetchMock)).toBe('sk-ant-built')
+  })
+
+  it('marks failures of the built-in key with keySource built-in (US1, FR-008)', async () => {
+    await clearApiKey()
+    vi.stubEnv('VITE_ANTHROPIC_KEY', 'sk-ant-built')
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      jsonResponse({ error: 'unauthorized' }, 401),
+    )
+
+    const err = await invoke().catch((e: unknown) => e)
+
+    expect(err).toBeInstanceOf(ClaudeNetworkError)
+    expect((err as ClaudeNetworkError).status).toBe(401)
+    expect((err as ClaudeNetworkError).keySource).toBe('built-in')
+  })
+
+  it('personal key wins over the built-in key (US2, FR-003)', async () => {
+    // beforeEach saved the personal key 'sk-test'
+    vi.stubEnv('VITE_ANTHROPIC_KEY', 'sk-ant-built')
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(jsonResponse(validResponse))
+
+    await invoke()
+
+    expect(sentApiKey(fetchMock)).toBe('sk-test')
+  })
+
+  it('an invalid personal key fails as personal — no silent fallback (US2)', async () => {
+    vi.stubEnv('VITE_ANTHROPIC_KEY', 'sk-ant-built')
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      jsonResponse({ error: 'unauthorized' }, 401),
+    )
+
+    const err = await invoke().catch((e: unknown) => e)
+
+    expect(err).toBeInstanceOf(ClaudeNetworkError)
+    expect((err as ClaudeNetworkError).keySource).toBe('personal')
+  })
+
+  it('throws MissingApiKeyError when the built-in key is blank (US3, FR-009)', async () => {
+    await clearApiKey()
+    vi.stubEnv('VITE_ANTHROPIC_KEY', '   ')
     await expect(invoke()).rejects.toBeInstanceOf(MissingApiKeyError)
   })
 })

@@ -15,7 +15,7 @@ import { navigate, setPendingRoute } from '@/App'
 import { addCoffee, type SavedCoffee } from '@/store/coffees'
 import { LogDrinkEntry } from '@/components/LogDrinkEntry'
 
-type ErrorReason = 'no_text' | 'network' | 'schema'
+type ErrorReason = 'no_text' | 'network' | 'schema' | 'built_in_key_rejected'
 
 type ScanState =
   | { kind: 'idle' }
@@ -50,7 +50,14 @@ export function ScanView() {
         return
       }
       if (err instanceof ClaudeNetworkError) {
-        setState({ kind: 'error', reason: 'network' })
+        // 005 FR-008: a rejected built-in key needs an actionable message
+        // naming the credential — not the generic network error.
+        const builtInRejected =
+          err.status === 401 && err.keySource === 'built-in'
+        setState({
+          kind: 'error',
+          reason: builtInRejected ? 'built_in_key_rejected' : 'network',
+        })
         return
       }
       console.error('Unexpected extraction error:', err)
